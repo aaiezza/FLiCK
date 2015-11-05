@@ -1,0 +1,35 @@
+Flick v{{version}}
+Usage: flick [-options] PATH [OUTPUT_FILE]
+    PATH can be either a file or directory
+    If no OUTPUT_FILE is given, the default will be the PATH given
+      with the extension .flick
+
+where options include:
+    --no-zip       flick will compress PATH without compressing
+                     encountered FASTA or FASTQ files to .flickfa
+                     or .flickfq format respectively
+    --no-zip-fa    flick will compress PATH without compressing
+                     encountered FASTA files to .flickfa format
+    --no-zip-fq    flick will compress PATH without compressing
+                     encountered FASTQ files to .flickfq format
+
+    -d --delete    delete PATH after compression is complete
+    -v --verbose   enable verbose output
+    --help         display this helpful information
+
+* If no FASTA/Q files are found or given,
+    the PATH will undergo standard ZIP compression.
+* FASTA/Q file detection is currently limited to detecting file extensions.
+
+EXAMPLES:
+  flick --delete --verbose Drosophila_research/ Dmel_research.flick
+    >> Compress the directory 'Drosophila_research' recursively
+         and delete the directory leaving the file Dmel_research.flick
+         and verbose output on the system
+
+  flick -d GCF_000001405.28_GRCh38.p2_genomic.fna Homo_sapien.fna.flickfa
+    >> Compress the file GCF_000001405.28_GRCh38.p2_genomic.fna
+         then delete it leaving Homo_sapien.fna.flickfa
+
+  flick SRR304976.fq
+    >> Compress SRR304976.fq to SRR304976.fq.flickfq

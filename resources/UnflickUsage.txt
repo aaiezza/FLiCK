@@ -1,0 +1,31 @@
+Flick v{{version}}
+Usage: unflick [-options] FLICK_FILE [OUTPUT_PATH]
+
+where options include:
+    --keep-zipped      unflick will compress PATH without compressing encountered
+                         FASTA or FASTQ files
+    --keep-zipped-fa   unflick will compress PATH without compressing encountered
+                         FASTA files
+    --keep-zipped-fq   unflick will compress PATH without compressing encountered
+                         FASTQ files
+
+    -d --delete        delete FLICK_FILE after decompression
+    -v --verbose       enable verbose output
+    --help             display this helpful information
+
+* Compressed FASTA/Q file detection is currently limited to detecting
+    file extensions .flickfa and .flickfq respectively within a .flick file.
+
+EXAMPLES:
+  unflick --delete --verbose Dmel_research.flick
+    >> Decompress the 'Dmel_research.flick' and delete the flick file
+         and tell me all about it.
+         All .flickfa/q files (compressed FASTA/Q files) will be inflated as well.
+
+  unflick -d GCF_000001405.28_GRCh38.p2_genomic.fna.flickfa
+    >> Decompress the file GCF_000001405.28_GRCh38.p2_genomic.fna.flickfa
+         then delete it leaving GCF_000001405.28_GRCh38.p2_genomic.fna
+
+  unflick SRR304976.fq.flick
+    >> Decompress SRR304976.fq.flick to SRR304976.fq
+    

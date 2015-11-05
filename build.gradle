@@ -1,0 +1,288 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+group = 'rit'
+version = 0.1
+jar.baseName = 'flick'
+// def uploadSite = 'ftp.bioinformatics.rit.edu'
+
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.edu.sc.seis.gradle:launch4j:1.1.3"
+        // Needed for upload task
+        classpath 'commons-net:commons-net:3.3'
+    }
+}
+
+apply plugin: "edu.sc.seis.launch4j"
+
+copyL4jLib  {
+    include "$libsDir/${name.toLowerCase()}-${version}.jar"
+}
+
+launch4j {
+    jar = "$libsDir/${name.toLowerCase()}-${version}.jar"
+
+    headerType = 'console'
+    outputDir = "resources"
+    chdir = ''
+    icon = "$projectDir/resources/logo.ico"
+    
+    bundledJrePath = "%JAVA_HOME%/bin/java.exe"
+    bundledJre64Bit = true
+    bundledJreAsFallback = true
+    downloadUrl = 'http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html'
+    
+    // companyName = 'Aiezza Inc'
+    supportUrl = 'https://github.com/aaiezza/flick'
+    
+    outfile = "${name.toLowerCase()}.exe"
+}
+
+task flickExe( dependsOn: generateXmlConfig, type: Exec ) {
+    commandLine "${->launch4j.launch4jCmd}", "${->project.buildDir}/${->launch4j.outputDir}/${->launch4j.xmlFileName}" 
+    workingDir "${->project.buildDir}/${->launch4j.outputDir}"
+}
+
+flickExe.doFirst {
+    launch4j {
+        mainClassName = 'edu.rit.flick.util.Flick'
+    }
+    generateXmlConfig.writeXmlConfig()
+}
+
+task unflickExe( dependsOn: generateXmlConfig, type: Exec ) {
+    commandLine "${->launch4j.launch4jCmd}", "${->project.buildDir}/${->launch4j.outputDir}/${->launch4j.xmlFileName}" 
+    workingDir "${->project.buildDir}/${->launch4j.outputDir}"
+}
+
+unflickExe.doFirst {
+    launch4j {
+        outfile = 'un' + outfile
+        mainClassName = 'edu.rit.flick.util.Unflick'
+    }
+    generateXmlConfig.writeXmlConfig()
+}
+
+// Explicitly create the main configuration
+configurations {
+   main
+}
+
+dependencies {
+    compile 'com.google.guava:guava:18.0'
+    compile 'net.lingala.zip4j:zip4j:1.3.2'
+    compile 'it.unimi.dsi:dsiutils:2.2.4'
+    
+    testCompile 'junit:junit:4.+'
+    testCompile 'junit-addons:junit-addons:1.+'
+    
+    main configurations.compile
+}
+
+// Redefine the sourcesets
+sourceSets {
+    main {
+        java.srcDir 'src'
+        resources {
+            srcDir 'resources'
+            include '*Usage.txt'
+            exclude 'launch4j_configs'
+        }
+    }
+    test {
+        java.srcDir 'test'
+        resources.srcDirs 'test_resources', main.resources
+    }
+}
+
+// Create bare jars. (This will come in handy later when we can upload to maven central)
+sourceSets.all { set ->
+    def jarTask = task("${set.name}Jar", type: Jar) {
+        baseName = jar.baseName + "-$set.name"
+        from set.output
+    }
+
+    artifacts {
+        archives jarTask
+    }
+}
+
+// Extract dependencies into a temp folder so they can be exported to the main jar
+task extractJars( type: Copy ) {
+    dependsOn configurations.main
+
+    def depJarFolder = file("${project.buildDir}/dep-jars/")
+
+    outputs.upToDateWhen { depJarFolder.exists() }
+
+    if ( !depJarFolder.exists() )
+    {
+	    from {
+	        configurations.main.asFileTree.each {
+	            from( zipTree( it ) )
+	        }
+	        // Don't include the actual archives themselves
+	        null
+	    }
+	    into depJarFolder
+	}
+}
+
+tasks.jar {
+    dependsOn extractJars
+    baseName = 'flick'
+    from sourceSets.main.output
+    from file("${project.buildDir}/dep-jars/")
+}
+
+// Insert version number into usage statement
+processResources {
+    eachFile { copyDetails ->
+        if ( copyDetails.path.endsWith( 'Usage.txt' ) ) {
+            filter { line ->
+                line.replace('{{version}}', "$version")
+            }
+        }
+    }
+    outputs.upToDateWhen { false }
+}
+
+// Task for bundling the releases
+task bundleReleases( group: 'Distribution' ) {
+    description = 'Builds distributions of flick for Unix & Windows systems.'
+    dependsOn 'bundleUnixRelease', 'bundleWindowsRelease'
+}
+
+task bundleUnixRelease ( group: 'Distribution', type: Tar ) {
+    dependsOn jar
+
+    baseName = jar.baseName
+    compression = Compression.GZIP
+    extension = 'tar.gz'
+    archiveName = "$baseName.$extension"
+    destinationDir file( "$distsDir" )
+    
+    from( sourceSets.main.resources.getSrcDirs() ) {
+	    include 'flick', 'unflick'
+	    eachFile {
+	        fileMode = 0755
+	    }
+	}
+    from ( "$libsDir" ) {
+        include "${baseName}-${version}.jar"
+        rename "${baseName}-${version}.jar", "${baseName}.jar"
+    }
+    into "${baseName}-${version}"
+    
+    outputs.upToDateWhen { false }
+}
+
+task bundleWindowsRelease ( group: 'Distribution', type: Zip ) {
+    dependsOn flickExe, unflickExe
+
+    baseName = jar.baseName
+    archiveName = "win-$baseName.$extension"
+    destinationDir file( "$distsDir" )
+
+    from "$buildDir/resources"
+    include 'flick.exe', 'unflick.exe'
+    into "${baseName}-${version}"
+    
+    outputs.upToDateWhen { false }
+}
+
+build << { bundleReleases }
+
+def lock = 0
+
+// File uploaders
+def getUploader = { fileLocation, uploadPath ->
+
+    lock ++
+    printf 'Uploading %s%n', fileLocation
+    
+    [
+        run: {
+		    def ftp = new org.apache.commons.net.ftp.FTPClient()
+		    def config = new org.apache.commons.net.ftp.FTPClientConfig()
+		    ftp.configure config
+		    def error = false
+		    try {
+		        def reply
+		        ftp.connect uploadSite
+		        // printf( "Connected to %s successfully.%n", uploadSite )
+		        // println ftp.replyString
+		
+		        // After connection attempt, you should check the reply code to verify
+		        // success.
+		        reply = ftp.replyCode
+		
+		        if( !org.apache.commons.net.ftp.FTPReply.isPositiveCompletion( reply ) ) {
+		            ftp.disconnect()
+		            println( "FTP server refused connection." )
+		        }
+		
+		        // login
+		        ftp.login 'FTPUser', 'FTPPassword'
+		
+		        // transfer files
+		        ftp.changeWorkingDirectory uploadPath
+		
+                def transferFile = file fileLocation
+                def fis = new java.io.FileInputStream( transferFile )
+                ftp.storeFile transferFile.name, fis
+                fis.close()
+                
+                printf '%s uploaded.%n', transferFile.name
+		
+		        ftp.logout()
+		        } catch( IOException e ) {
+		      error = true
+		      e.printStackTrace()
+		    } finally {
+		        if( ftp.isConnected() ) {
+		            try {
+		                ftp.disconnect()
+		            } catch( IOException ioe ) {
+		              // do nothing
+		            }
+		        }
+		    }
+		    lock --
+		}
+    ] as java.lang.Thread
+} 
+
+// Upload distribution artifacts to an FTP
+task uploadDistribution( group: 'Distribution' , dependsOn: bundleReleases ) << {
+
+    def t1 = getUploader "$libsDir/${jar.baseName}-${version}.jar", '/flick/builds'
+    def t2 = getUploader "$libsDir/${jar.baseName}-main-${version}.jar", '/flick/builds'
+    def t3 = getUploader "$distsDir/win-${jar.baseName}.zip", '/flick/Windows'
+    def t4 = getUploader "$distsDir/${jar.baseName}.tar.gz", '/flick/Unix'
+
+    t1.start()
+    t2.start()
+    t3.start()
+    t4.start()
+    
+    while ( lock > 0 ) {}
+}
+
+task p << {
+    println sourceSets.getNames()
+    this.properties.sort().each { k, v ->
+        println "$k : $v"
+    }
+}
