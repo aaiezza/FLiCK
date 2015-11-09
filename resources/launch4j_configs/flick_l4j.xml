@@ -3,14 +3,12 @@
 	<dontWrapJar>false</dontWrapJar>
 	<headerType>console</headerType>
 	<jar>D:\git\flick\build\libs\flick.jar</jar>
-	<outfile>D:\School\RIT\thesis\workspace\flick\resources\flick.exe
-	</outfile>
+	<outfile>D:\git\flick\resources\flick.exe</outfile>
 	<errTitle></errTitle>
 	<cmdLine></cmdLine>
 	<chdir></chdir>
 	<priority>normal</priority>
-	<downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
-	</downloadUrl>
+	<downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html</downloadUrl>
 	<supportUrl></supportUrl>
 	<stayAlive>false</stayAlive>
 	<restartOnCrash>false</restartOnCrash>

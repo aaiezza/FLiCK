@@ -15,7 +15,7 @@
   <manifest></manifest>
   <icon>D:\git\flick\resources\logo.ico</icon>
   <classPath>
-    <mainClass>edu.geneopedia.flick.util.UngenZip</mainClass>
+    <mainClass>edu.rit.flick.util.Unflick</mainClass>
     <cp>flick.jar</cp>
   </classPath>
   <jre>
