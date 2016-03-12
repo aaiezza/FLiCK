@@ -28,7 +28,7 @@ public interface FastFileArchiver extends FileArchiver
 
     final static int           DEFAULT_BUFFER                  = 1024;
 
-    final static String        GENZIP_FAST_FILE_TMP_DIR_SUFFIX = "~flick\\" + File.separator;
+    final static String        FLICK_FAST_FILE_TMP_DIR_SUFFIX = "~flick\\" + File.separator;
 
     /*
      * Byte iteration file location

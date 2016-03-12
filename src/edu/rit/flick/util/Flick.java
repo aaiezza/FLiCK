@@ -25,7 +25,7 @@ import edu.rit.flick.config.DeflationConfiguration;
  */
 public class Flick
 {
-    public static final String  GENZIP_USAGE_FILE = "FlickUsage.txt";
+    public static final String  FLICK_USAGE_FILE = "FlickUsage.txt";
 
     /*
      * USAGE statement
@@ -36,7 +36,7 @@ public class Flick
     {
         final StringBuilder usage = new StringBuilder();
         final BufferedReader br = new BufferedReader( new InputStreamReader( Flick.class
-            .getClassLoader().getResourceAsStream( GENZIP_USAGE_FILE ) ) );
+            .getClassLoader().getResourceAsStream( FLICK_USAGE_FILE ) ) );
         br.lines().forEach( line -> usage.append( line ).append( "\n" ) );
         USAGE_FORMAT = usage.toString();
     }

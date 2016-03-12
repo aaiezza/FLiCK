@@ -137,7 +137,7 @@ public class FlickTest
 
         Flick.main( HELP_FLAG );
         String expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +
-            Flick.GENZIP_USAGE_FILE ), Charset.defaultCharset() );
+            Flick.FLICK_USAGE_FILE ), Charset.defaultCharset() );
         String actualUsageStatement = outContent.toString();
         assertEquals( expectedUsageStatement, actualUsageStatement );
 
@@ -146,7 +146,7 @@ public class FlickTest
 
         Unflick.main( HELP_FLAG );
         expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +
-            Unflick.UNGENZIP_USAGE_FILE ), Charset.defaultCharset() ) +
+            Unflick.UNFLICK_USAGE_FILE ), Charset.defaultCharset() ) +
             "\n";
         actualUsageStatement = outContent.toString();
         assertEquals( expectedUsageStatement, actualUsageStatement );

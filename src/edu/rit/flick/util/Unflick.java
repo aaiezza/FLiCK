@@ -25,7 +25,7 @@ import edu.rit.flick.config.InflationConfiguration;
  */
 public class Unflick
 {
-    public static final String  UNGENZIP_USAGE_FILE = "UnflickUsage.txt";
+    public static final String  UNFLICK_USAGE_FILE = "UnflickUsage.txt";
 
     /*
      * USAGE statement
@@ -36,7 +36,7 @@ public class Unflick
     {
         final StringBuilder usage = new StringBuilder();
         final BufferedReader br = new BufferedReader( new InputStreamReader( Flick.class
-            .getClassLoader().getResourceAsStream( UNGENZIP_USAGE_FILE ) ) );
+            .getClassLoader().getResourceAsStream( UNFLICK_USAGE_FILE ) ) );
         br.lines().forEach( line -> usage.append( line ).append( "\n" ) );
         USAGE_FORMAT = usage.toString();
     }

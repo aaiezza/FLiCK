@@ -4,7 +4,14 @@
     <eAnnotations xmi:id="_4AoasNRXEeWg6Ki32dw_Og" source="http://ns.yatta.de/umllab">
       <contents xmi:type="ecore:EAnnotation" xmi:id="_4AoasdRXEeWg6Ki32dw_Og" source="codegen">
         <details xmi:id="_4AoastRXEeWg6Ki32dw_Og" key="codegenDirectory" value="/flick/resources"/>
-        <details xmi:id="_ChzyENRmEeWg6Ki32dw_Og" key="AssociatedSourceCode" value="/flick/src/edu/rit/flick/AbstractFlickFile.java;1556137924/1;/flick/src/edu/rit/flick/config/ConfigurationProcessor.java;575928632/1;/flick/src/edu/rit/flick/FileArchiver.java;2549822828/1;/flick/src/edu/rit/flick/FileDeflator.java;3021471743/1;/flick/src/edu/rit/flick/FileInflator.java;553955518/1;/flick/src/edu/rit/flick/FlickFile.java;1552659039/1;/flick/src/edu/rit/flick/config/Configuration.java;454714696/1;/flick/src/edu/rit/flick/config/AbstractOption.java;2707971271/1;/flick/src/edu/rit/flick/config/AbstractOptionSet.java;1092116781/1;/flick/src/edu/rit/flick/config/AbstractConfiguration.java;285232421/1;/flick/src/edu/rit/flick/config/OptionSet.java;3456057298/1;/flick/src/edu/rit/flick/config/DefaultFlag.java;1656290218/1;/flick/src/edu/rit/flick/config/DefaultOptionSet.java;4046003158/1;/flick/src/edu/rit/flick/config/DeflationConfiguration.java;1490843136/1;/flick/src/edu/rit/flick/config/DeflationOptionSet.java;2377141722/1;/flick/src/edu/rit/flick/config/Flag.java;3284223630/1;/flick/src/edu/rit/flick/config/InflationConfiguration.java;2783581404/1;/flick/src/edu/rit/flick/config/InflationOptionSet.java;873763243/1;/flick/src/edu/rit/flick/config/Option.java;4188169649/1;/flick/src/edu/rit/flick/config/StringOption.java;651186218/1;/flick/src/edu/rit/flick/DefaultFlickFile.java;162615491/1;/flick/src/edu/rit/flick/genetics/ByteConverterBiMapFactory.java;4203823801/1;/flick/src/edu/rit/flick/genetics/FastFileDeflator.java;2797161832/1;/flick/src/edu/rit/flick/genetics/FastFileArchiver.java;1239612336/1;/flick/src/edu/rit/flick/genetics/FastaFileInflator.java;3965915007/1;/flick/src/edu/rit/flick/genetics/FastaFileDeflator.java;426835781/1;/flick/src/edu/rit/flick/genetics/TetramerNotFoundException.java;651205329/1;/flick/src/edu/rit/flick/genetics/FastqFileInflator.java;2572105395/1;/flick/src/edu/rit/flick/genetics/FastqFileArchiver.java;937825628/1;/flick/src/edu/rit/flick/genetics/FastqFileDeflator.java;832334651/1;/flick/src/edu/rit/flick/genetics/FastaFileArchiver.java;2835019032/1;/flick/src/edu/rit/flick/genetics/config/FastaDeflationOptionSet.java;228972764/1;/flick/src/edu/rit/flick/genetics/config/FastaInflationOptionSet.java;4027636729/1;/flick/src/edu/rit/flick/genetics/config/FastqDeflationOptionSet.java;1646654552/1;/flick/src/edu/rit/flick/genetics/config/FastqInflationOptionSet.java;3043232986/1;/flick/src/edu/rit/flick/util/Flick.java;2061561329/1;/flick/src/edu/rit/flick/util/Unflick.java;3649306146/1;/flick/src/edu/rit/util/HexPrinter.java;1350589528/1;/flick/test/edu/rit/flick/util/FlickTest.java;2066331739/1;/flick/src/edu/rit/util/ByteBufferOutputStream.java;3802349185/1;/flick/src/edu/rit/flick/genetics/FastFileInflator.java;923318441/1;"/>
+        <details xmi:id="_ChzyENRmEeWg6Ki32dw_Og" key="AssociatedSourceCode" value="/flick/src/edu/rit/flick/AbstractFlickFile.java;1556137924/1;/flick/src/edu/rit/flick/config/ConfigurationProcessor.java;575928632/1;/flick/src/edu/rit/flick/FileArchiver.java;2549822828/1;/flick/src/edu/rit/flick/FileDeflator.java;3021471743/1;/flick/src/edu/rit/flick/FileInflator.java;553955518/1;/flick/src/edu/rit/flick/FlickFile.java;1552659039/1;/flick/src/edu/rit/flick/config/Configuration.java;454714696/1;/flick/src/edu/rit/flick/config/AbstractOption.java;2707971271/1;/flick/src/edu/rit/flick/config/AbstractOptionSet.java;1092116781/1;/flick/src/edu/rit/flick/config/AbstractConfiguration.java;285232421/1;/flick/src/edu/rit/flick/config/OptionSet.java;3456057298/1;/flick/src/edu/rit/flick/config/DefaultFlag.java;1656290218/1;/flick/src/edu/rit/flick/config/DefaultOptionSet.java;4046003158/1;/flick/src/edu/rit/flick/config/DeflationConfiguration.java;1490843136/1;/flick/src/edu/rit/flick/config/DeflationOptionSet.java;2377141722/1;/flick/src/edu/rit/flick/config/Flag.java;3284223630/1;/flick/src/edu/rit/flick/config/InflationConfiguration.java;2783581404/1;/flick/src/edu/rit/flick/config/InflationOptionSet.java;873763243/1;/flick/src/edu/rit/flick/config/Option.java;4188169649/1;/flick/src/edu/rit/flick/config/StringOption.java;651186218/1;/flick/src/edu/rit/flick/DefaultFlickFile.java;162615491/1;/flick/src/edu/rit/flick/genetics/ByteConverterBiMapFactory.java;4203823801/1;/flick/src/edu/rit/flick/genetics/FastFileDeflator.java;3420644376/1;/flick/src/edu/rit/flick/genetics/FastFileArchiver.java;1600693133/1;/flick/src/edu/rit/flick/genetics/FastaFileInflator.java;3965915007/1;/flick/src/edu/rit/flick/genetics/FastaFileDeflator.java;426835781/1;/flick/src/edu/rit/flick/genetics/TetramerNotFoundException.java;651205329/1;/flick/src/edu/rit/flick/genetics/FastqFileInflator.java;2572105395/1;/flick/src/edu/rit/flick/genetics/FastqFileArchiver.java;937825628/1;/flick/src/edu/rit/flick/genetics/FastqFileDeflator.java;832334651/1;/flick/src/edu/rit/flick/genetics/FastaFileArchiver.java;2835019032/1;/flick/src/edu/rit/flick/genetics/config/FastaDeflationOptionSet.java;228972764/1;/flick/src/edu/rit/flick/genetics/config/FastaInflationOptionSet.java;4027636729/1;/flick/src/edu/rit/flick/genetics/config/FastqDeflationOptionSet.java;1646654552/1;/flick/src/edu/rit/flick/genetics/config/FastqInflationOptionSet.java;3043232986/1;/flick/src/edu/rit/flick/util/Flick.java;1747837734/1;/flick/src/edu/rit/flick/util/Unflick.java;1062280889/1;/flick/src/edu/rit/util/HexPrinter.java;1350589528/1;/flick/test/edu/rit/flick/util/FlickTest.java;2412367096/1;/flick/src/edu/rit/util/ByteBufferOutputStream.java;3802349185/1;/flick/src/edu/rit/flick/genetics/FastFileInflator.java;4069087614/1;"/>
+      </contents>
+      <contents xmi:type="ecore:EAnnotation" xmi:id="_cMTKANjqEeWpMNe4koXegA" source="preferences">
+        <contents xmi:type="ecore:EAnnotation" xmi:id="_cMTxENjqEeWpMNe4koXegA" source="com.yattasolutions.codegen.reverse">
+          <details xmi:id="_cMTxEdjqEeWpMNe4koXegA" key="com.yattasolutions.codegen.reverse.roundtrip.ReverseEngineerNewFiles" value="true"/>
+          <details xmi:id="_cMTxEtjqEeWpMNe4koXegA" key="com.yattasolutions.codegen.reverse.roundtrip.ReverseEngineerChangedFiles" value="true"/>
+          <details xmi:id="_cMTxE9jqEeWpMNe4koXegA" key="com.yattasolutions.codegen.reverse.roundtrip.RemoveDeletedFiles" value="true"/>
+        </contents>
       </contents>
     </eAnnotations>
     <elementImport xmi:id="_5lanMNRXEeWg6Ki32dw_Og">
@@ -1803,7 +1810,7 @@
      {&#xD;
          // Compress to Directory&#xD;
          final String outputDirectoryPath = fileOut.getPath().replaceAll(&#xD;
-             &quot;.&quot; + Files.getFileExtension( fileOut.getPath() ), GENZIP_FAST_FILE_TMP_DIR_SUFFIX );&#xD;
+             &quot;.&quot; + Files.getFileExtension( fileOut.getPath() ), FLICK_FAST_FILE_TMP_DIR_SUFFIX );&#xD;
 &#xD;
          final File tmpOutputDirectory = new File( outputDirectoryPath );&#xD;
          if ( tmpOutputDirectory.exists() )&#xD;
@@ -2247,7 +2254,7 @@
                 <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
                 <defaultValue xmi:type="uml:LiteralString" xmi:id="_5oM1cdRXEeWg6Ki32dw_Og" value="1024"/>
               </ownedAttribute>
-              <ownedAttribute xmi:id="_5oNcgdRXEeWg6Ki32dw_Og" name="GENZIP_FAST_FILE_TMP_DIR_SUFFIX" isLeaf="true" isStatic="true" isReadOnly="true">
+              <ownedAttribute xmi:id="_5oNcgdRXEeWg6Ki32dw_Og" name="FLICK_FAST_FILE_TMP_DIR_SUFFIX" isLeaf="true" isStatic="true" isReadOnly="true">
                 <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
                 <defaultValue xmi:type="uml:LiteralString" xmi:id="_5oNcgtRXEeWg6Ki32dw_Og" value="&quot;~flick\\&quot; + File.separator"/>
               </ownedAttribute>
@@ -3708,7 +3715,7 @@
      {&#xD;
          // Inflate to Directory&#xD;
          final String outputDirectoryPath = fileOut.getPath().replaceAll(&#xD;
-             &quot;.&quot; + Files.getFileExtension( fileOut.getPath() ), GENZIP_FAST_FILE_TMP_DIR_SUFFIX );&#xD;
+             &quot;.&quot; + Files.getFileExtension( fileOut.getPath() ), FLICK_FAST_FILE_TMP_DIR_SUFFIX );&#xD;
 &#xD;
          final File tmpOutputDirectory = new File( outputDirectoryPath );&#xD;
          if ( tmpOutputDirectory.exists() )&#xD;
@@ -4159,7 +4166,7 @@
                 <body>@author Alex Aiezza&#xD;
  *</body>
               </ownedComment>
-              <ownedAttribute xmi:id="_6DEMgNRXEeWg6Ki32dw_Og" name="GENZIP_USAGE_FILE" isLeaf="true" isStatic="true" isReadOnly="true">
+              <ownedAttribute xmi:id="_6DEMgNRXEeWg6Ki32dw_Og" name="FLICK_USAGE_FILE" isLeaf="true" isStatic="true" isReadOnly="true">
                 <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
                 <defaultValue xmi:type="uml:LiteralString" xmi:id="_6DEMgdRXEeWg6Ki32dw_Og" value="&quot;FlickUsage.txt&quot;"/>
               </ownedAttribute>
@@ -4170,7 +4177,7 @@
                 <language>java</language>
                 <body>final StringBuilder usage = new StringBuilder();&#xD;
      final BufferedReader br = new BufferedReader( new InputStreamReader( Flick.class&#xD;
-         .getClassLoader().getResourceAsStream( GENZIP_USAGE_FILE ) ) );&#xD;
+         .getClassLoader().getResourceAsStream( FLICK_USAGE_FILE ) ) );&#xD;
      br.lines().forEach( line -> usage.append( line ).append( &quot;\n&quot; ) );&#xD;
      USAGE_FORMAT = usage.toString();&#xD;
  </body>
@@ -4239,7 +4246,7 @@
                 <body>@author Alex Aiezza&#xD;
  *</body>
               </ownedComment>
-              <ownedAttribute xmi:id="_6DEzkNRXEeWg6Ki32dw_Og" name="UNGENZIP_USAGE_FILE" isLeaf="true" isStatic="true" isReadOnly="true">
+              <ownedAttribute xmi:id="_6DEzkNRXEeWg6Ki32dw_Og" name="UNFLICK_USAGE_FILE" isLeaf="true" isStatic="true" isReadOnly="true">
                 <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
                 <defaultValue xmi:type="uml:LiteralString" xmi:id="_6DEzkdRXEeWg6Ki32dw_Og" value="&quot;UnflickUsage.txt&quot;"/>
               </ownedAttribute>
@@ -4250,7 +4257,7 @@
                 <language>java</language>
                 <body>final StringBuilder usage = new StringBuilder();&#xD;
      final BufferedReader br = new BufferedReader( new InputStreamReader( Flick.class&#xD;
-         .getClassLoader().getResourceAsStream( UNGENZIP_USAGE_FILE ) ) );&#xD;
+         .getClassLoader().getResourceAsStream( UNFLICK_USAGE_FILE ) ) );&#xD;
      br.lines().forEach( line -> usage.append( line ).append( &quot;\n&quot; ) );&#xD;
      USAGE_FORMAT = usage.toString();&#xD;
  </body>
@@ -4414,7 +4421,7 @@
 &#xD;
      Flick.main( HELP_FLAG );&#xD;
      String expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +&#xD;
-         Flick.GENZIP_USAGE_FILE ), Charset.defaultCharset() );&#xD;
+         Flick.FLICK_USAGE_FILE ), Charset.defaultCharset() );&#xD;
      String actualUsageStatement = outContent.toString();&#xD;
      assertEquals( expectedUsageStatement, actualUsageStatement );&#xD;
 &#xD;
@@ -4423,7 +4430,7 @@
 &#xD;
      Unflick.main( HELP_FLAG );&#xD;
      expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +&#xD;
-         Unflick.UNGENZIP_USAGE_FILE ), Charset.defaultCharset() ) +&#xD;
+         Unflick.UNFLICK_USAGE_FILE ), Charset.defaultCharset() ) +&#xD;
          &quot;\n&quot;;&#xD;
      actualUsageStatement = outContent.toString();&#xD;
      assertEquals( expectedUsageStatement, actualUsageStatement );&#xD;

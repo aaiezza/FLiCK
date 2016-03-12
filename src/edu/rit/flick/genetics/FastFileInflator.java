@@ -226,7 +226,7 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
         {
             // Inflate to Directory
             final String outputDirectoryPath = fileOut.getPath().replaceAll(
-                "." + Files.getFileExtension( fileOut.getPath() ), GENZIP_FAST_FILE_TMP_DIR_SUFFIX );
+                "." + Files.getFileExtension( fileOut.getPath() ), FLICK_FAST_FILE_TMP_DIR_SUFFIX );
 
             final File tmpOutputDirectory = new File( outputDirectoryPath );
             if ( tmpOutputDirectory.exists() )
