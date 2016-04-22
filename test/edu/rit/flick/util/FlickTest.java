@@ -90,7 +90,7 @@ public class FlickTest
         System.setErr( new PrintStream( errContent ) );
     }
 
-    private File             originalFile, flickpedFile, unflickpedFile;
+    private File             originalFile, flickedFile, unflickedFile;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -101,8 +101,8 @@ public class FlickTest
         System.gc();
         Thread.sleep( 100 );
 
-        assertTrue( FileUtils.deleteQuietly( flickpedFile ) );
-        assertTrue( FileUtils.deleteQuietly( unflickpedFile ) );
+        assertTrue( FileUtils.deleteQuietly( flickedFile ) );
+        assertTrue( FileUtils.deleteQuietly( unflickedFile ) );
     }
 
     @Test
@@ -231,13 +231,13 @@ public class FlickTest
     {
         final String outputDirectory = directory + "-inflated";
         originalFile = getFile( TEST_RESOURCES_FOLDER, directory );
-        flickpedFile = new File( TEST_RESOURCES_FOLDER + directory +
+        flickedFile = new File( TEST_RESOURCES_FOLDER + directory +
             DefaultFlickFile.DEFAULT_DEFLATED_EXTENSION );
-        unflickpedFile = getFile( TEST_RESOURCES_FOLDER, outputDirectory );
+        unflickedFile = getFile( TEST_RESOURCES_FOLDER, outputDirectory );
 
         Flick.main( VERBOSE_FLAG, originalFile.getPath() );
 
-        Unflick.main( VERBOSE_FLAG, flickpedFile.getPath(), unflickpedFile.getPath() );
+        Unflick.main( VERBOSE_FLAG, flickedFile.getPath(), unflickedFile.getPath() );
 
         Files.fileTreeTraverser()
         .breadthFirstTraversal( originalFile )
@@ -259,10 +259,10 @@ public class FlickTest
     private final void testFASTAfile( final String fileBase )
     {
         originalFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastaFileArchiver.FASTA_EXTENSION );
-        flickpedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
+        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
             FastaFileArchiver.FASTA_EXTENSION +
             FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION );
-        unflickpedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTA_EXTENSION );
+        unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTA_EXTENSION );
 
         try
         {
@@ -276,10 +276,10 @@ public class FlickTest
     private final void testFASTQfile( final String fileBase )
     {
         originalFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastqFileArchiver.FASTQ_EXTENSION );
-        flickpedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
+        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
             FastqFileArchiver.FASTQ_EXTENSION +
             FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION );
-        unflickpedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTQ_EXTENSION );
+        unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTQ_EXTENSION );
 
         try
         {
@@ -294,14 +294,14 @@ public class FlickTest
     {
         Flick.main( VERBOSE_FLAG, originalFile.getPath() );
 
-        Unflick.main( VERBOSE_FLAG, flickpedFile.getPath(), unflickpedFile.getPath() );
+        Unflick.main( VERBOSE_FLAG, flickedFile.getPath(), unflickedFile.getPath() );
 
         final FileInputStream origFIS = new FileInputStream( originalFile );
         ByteBufferInputStream orig = ByteBufferInputStream.map( origFIS.getChannel() );
-        final FileInputStream comAndDecomFIS = new FileInputStream( unflickpedFile );
+        final FileInputStream comAndDecomFIS = new FileInputStream( unflickedFile );
         ByteBufferInputStream comAndDecom = ByteBufferInputStream.map( comAndDecomFIS.getChannel() );
 
-        if ( !FileUtils.contentEquals( originalFile, unflickpedFile ) )
+        if ( !FileUtils.contentEquals( originalFile, unflickedFile ) )
         {
             long position = 0;
             while ( orig.available() > 0 )
@@ -310,7 +310,7 @@ public class FlickTest
                 final int o = orig.read();
                 final int c = comAndDecom.read();
                 assertEquals(
-                    format( FILES_DO_NOT_MATCH_ERROR_FORMAT, originalFile, unflickpedFile, position ),
+                    format( FILES_DO_NOT_MATCH_ERROR_FORMAT, originalFile, unflickedFile, position ),
                     (char) o + "", (char) c + "" );
             }
 
