@@ -113,8 +113,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
         fastOut = null;
 
         // Give the last method a moment to garbage collect
-        System.gc();
-        Thread.sleep( 1000 );
+        // System.gc();
+        // Thread.sleep( 1000 );
     }
 
     @Override
@@ -232,21 +232,37 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
             if ( tmpOutputDirectory.exists() )
                 FileUtils.deleteDirectory( tmpOutputDirectory );
 
+            // Make cleaning hook
+            final Thread cleanHook = new Thread( () -> {
+                try
+                {
+                    // Clean up IO
+                    close();
+
+                    // Give the last method a moment to garbage collect
+                    System.gc();
+                    // Thread.sleep( 1000 );
+
+                    // Clean up temporary directory
+                    FileUtils.deleteDirectory( tmpOutputDirectory );
+                } catch ( final IOException | InterruptedException e )
+                {
+                    e.printStackTrace();
+                }
+            } );
+
+            Runtime.getRuntime().addShutdownHook( cleanHook );
+
             // Inflate Fast file to a temporary directory
             inflateFromFile( fileIn, tmpOutputDirectory );
 
             // Inflate Directory to a zip file
             inflateFromDirectory( tmpOutputDirectory, fileOut );
 
-            // Clean up IO
-            close();
+            cleanHook.start();
+            cleanHook.join();
 
-            // Give the last method a moment to garbage collect
-            System.gc();
-            Thread.sleep( 1000 );
-
-            // Clean up temporary directory
-            FileUtils.deleteDirectory( tmpOutputDirectory );
+            Runtime.getRuntime().removeShutdownHook( cleanHook );
 
         } catch ( IOException | InterruptedException e )
         {

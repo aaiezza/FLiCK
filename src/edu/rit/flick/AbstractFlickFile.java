@@ -35,7 +35,7 @@ public abstract class AbstractFlickFile implements FlickFile
 
     private static final String   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "can't overwrite existing file without --force flag";
 
-    private final File            fileIn, fileOut;
+    protected final File          fileIn, fileOut;
 
     protected final Configuration configuration;
 
@@ -50,6 +50,8 @@ public abstract class AbstractFlickFile implements FlickFile
     {
         this.configuration = configuration;
 
+        init();
+
         final String inputPath = (String) configuration.getOption( INPUT_PATH );
         final Object outputPath = configuration.getOption( OUTPUT_PATH );
 
@@ -61,10 +63,11 @@ public abstract class AbstractFlickFile implements FlickFile
             throw new NoSuchFileException( fileIn.getPath(), null,
                     FILE_NOT_FOUND_EXCEPTION_MESSAGE );
 
+        if ( fileOut.isDirectory() )
+            throw new FileAlreadyExistsException( FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION );
+
         if ( fileOut.exists() )
         {
-            if ( fileOut.isDirectory() )
-                throw new FileAlreadyExistsException( FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION );
             if ( !configuration.getFlag( FORCE_FLAG ) )
                 throw new FileAlreadyExistsException( fileIn.getPath(), fileOut.getPath(),
                         CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG );
@@ -109,4 +112,7 @@ public abstract class AbstractFlickFile implements FlickFile
     {
         return fileOut.getPath();
     }
+
+    protected void init()
+    {}
 }

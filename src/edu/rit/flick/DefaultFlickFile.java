@@ -48,21 +48,21 @@ import net.lingala.zip4j.util.InternalZipConstants;
  */
 public class DefaultFlickFile extends AbstractFlickFile
 {
-    public static final String       DEFAULT_DEFLATED_EXTENSION               = ".flick";
+    public static final String  DEFAULT_DEFLATED_EXTENSION               = ".flick";
 
     /*
      * INFO, WARNING & ERROR messages
      */
 
-    private static final String      VERBOSE_COMPRESSION_INFO_FORMAT          = "Compressed '%s' in %.2f sec (deflated %.2f%%)%n";
+    private static final String VERBOSE_COMPRESSION_INFO_FORMAT          = "Compressed '%s' in %.2f sec (deflated %.2f%%)%n";
 
-    private static final String      VERBOSE_DECOMPRESSION_INFO_FORMAT        = "Decompressed '%s' in %.2f sec (inflated %.2f%%)%n";
+    private static final String VERBOSE_DECOMPRESSION_INFO_FORMAT        = "Decompressed '%s' in %.2f sec (inflated %.2f%%)%n";
 
-    private static final String      FILE_COULD_NOT_BE_DELETED_WARNING_FORMAT = "File '%s' could not be deleted.%n";
+    private static final String FILE_COULD_NOT_BE_DELETED_WARNING_FORMAT = "File '%s' could not be deleted.%n";
 
-    private final List<FileDeflator> fileDeflators;
+    private List<FileDeflator>  fileDeflators;
 
-    private final List<FileInflator> fileInflators;
+    private List<FileInflator>  fileInflators;
 
     /**
      * @param configuration
@@ -76,7 +76,11 @@ public class DefaultFlickFile extends AbstractFlickFile
         NoSuchFileException
     {
         super( configuration );
+    }
 
+    @Override
+    protected void init()
+    {
         fileDeflators = new ArrayList<FileDeflator>();
         fileInflators = new ArrayList<FileInflator>();
 
@@ -85,6 +89,7 @@ public class DefaultFlickFile extends AbstractFlickFile
         else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE )
             addDefaultFileInflators();
     }
+
 
     private final void addDefaultFileDeflators()
     {
@@ -234,6 +239,21 @@ public class DefaultFlickFile extends AbstractFlickFile
     @Override
     public String getDefaultDeflatedExtension()
     {
+        final String fileExt = "." + Files.getFileExtension( fileIn.getPath() );
+
+        if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE )
+        {
+            for ( final FileDeflator fd : fileDeflators )
+                if ( fd.getExtensions().contains( fileExt ) )
+                    return fd.getDefaultDeflatedExtension();
+        } else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE )
+        {
+            for ( final FileInflator fi : fileInflators )
+                if ( fi.getExtensions().contains( fileExt ) )
+                    return Files.getFileExtension( fileIn.getPath().substring( 0,
+                        fileIn.getPath().indexOf( fi.getDefaultDeflatedExtension() ) ) );
+        }
+
         return DEFAULT_DEFLATED_EXTENSION;
     }
 

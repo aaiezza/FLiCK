@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 group = 'rit'
-version = 0.1
+version = 0.2
 jar.baseName = 'flick'
 // def uploadSite = 'ftp.bioinformatics.rit.edu'
 
@@ -41,7 +41,7 @@ launch4j {
     bundledJrePath = "%JAVA_HOME%/bin/java.exe"
     bundledJre64Bit = true
     bundledJreAsFallback = true
-    downloadUrl = 'http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html'
+    downloadUrl = 'http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html'
     
     // companyName = 'Aiezza Inc'
     supportUrl = 'https://github.com/aaiezza/flick'

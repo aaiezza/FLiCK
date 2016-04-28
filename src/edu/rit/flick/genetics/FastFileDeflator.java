@@ -62,17 +62,18 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
     protected final AtomicInteger       lineType                   = new AtomicInteger(
             SEQUENCE_IDENTIFIER_LINE );
     protected final LongAdder           dnaPosition                = new LongAdder()
-                                                                   {
-                                                                       private static final long serialVersionUID = 1L;
+    // @formatter:off
+    {
+        private static final long serialVersionUID = 1L;
 
-                                                                       @Override
-                                                                       public void increment()
-                                                                       {
-                                                                           super.increment();
-                                                                           localSeqLineSize++;
-                                                                       }
-
-                                                                   };
+        @Override
+        public void increment()
+        {
+            super.increment();
+            localSeqLineSize++;
+        }
+    };
+    // @formatter:on
     protected int                       compressionCounter         = 0;
 
     protected int                       localSeqLineSize           = 0;
@@ -139,16 +140,32 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                 FileUtils.deleteDirectory( tmpOutputDirectory );
             tmpOutputDirectory.mkdirs();
 
+            // Make cleaning hook
+            final Thread cleanHook = new Thread( () -> {
+                try
+                {
+                    // Remove unused buffer space
+                    removeUnusedBufferSpace( outputDirectoryPath );
+
+                    // Compress Directory to a zip file
+                    deflateToFile( tmpOutputDirectory, fileOut );
+                } catch ( final IOException | ZipException | InterruptedException e )
+                {
+                    e.printStackTrace();
+                }
+            } );
+
+            Runtime.getRuntime().addShutdownHook( cleanHook );
+
             // Deflate Fast file to a temporary directory
             deflateToDirectory( fileIn, tmpOutputDirectory );
 
-            // Remove unused buffer space
-            removeUnusedBufferSpace( outputDirectoryPath );
+            cleanHook.start();
+            cleanHook.join();
 
-            // Compress Directory to a zip file
-            deflateToFile( tmpOutputDirectory, fileOut );
+            Runtime.getRuntime().removeShutdownHook( cleanHook );
 
-        } catch ( IOException | ZipException | InterruptedException e )
+        } catch ( final IOException | InterruptedException e )
         {
             e.printStackTrace();
         }
@@ -409,8 +426,8 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
         nfile = null;
 
         // Give the last method a moment to garbage collect
-        System.gc();
-        Thread.sleep( 1000 );
+        // System.gc();
+        // Thread.sleep( 1000 );
 
         final File dataFile = new File( tmpOutputDirectory + SEQUENCE_DATA_FILE );
         final File nFile = new File( tmpOutputDirectory + N_FILE );

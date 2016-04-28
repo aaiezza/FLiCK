@@ -39,6 +39,8 @@ public class Flick
                 Flick.class.getClassLoader().getResourceAsStream( FLICK_USAGE_FILE ) ) );
         br.lines().forEach( line -> usage.append( line ).append( "\n" ) );
         USAGE_FORMAT = usage.toString();
+        
+        // TODO Map file extensions to deflators.
     }
 
     public static void main( final String... args )
