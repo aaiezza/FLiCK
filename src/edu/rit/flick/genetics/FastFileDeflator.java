@@ -7,7 +7,6 @@
 package edu.rit.flick.genetics;
 
 import static java.lang.String.format;
-import it.unimi.dsi.io.ByteBufferInputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -21,11 +20,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
-
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.BiMap;
@@ -34,6 +28,11 @@ import com.google.common.io.Files;
 import edu.rit.flick.FileDeflator;
 import edu.rit.flick.config.Configuration;
 import edu.rit.util.ByteBufferOutputStream;
+import it.unimi.dsi.io.ByteBufferInputStream;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 
 /**
  * @author Alex Aiezza
@@ -61,19 +60,19 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
     protected byte                      dnaByte;
 
     protected final AtomicInteger       lineType                   = new AtomicInteger(
-        SEQUENCE_IDENTIFIER_LINE );
+            SEQUENCE_IDENTIFIER_LINE );
     protected final LongAdder           dnaPosition                = new LongAdder()
-    {
-        private static final long serialVersionUID = 1L;
+                                                                   {
+                                                                       private static final long serialVersionUID = 1L;
 
-        @Override
-        public void increment()
-        {
-            super.increment();
-            localSeqLineSize++;
-        }
+                                                                       @Override
+                                                                       public void increment()
+                                                                       {
+                                                                           super.increment();
+                                                                           localSeqLineSize++;
+                                                                       }
 
-    };
+                                                                   };
     protected int                       compressionCounter         = 0;
 
     protected int                       localSeqLineSize           = 0;
@@ -108,12 +107,12 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
             MapMode.READ_WRITE, (long) ( fastFile.length() * EXPECTED_COMPRESSION_RATIO ) );
         nfile = ByteBufferOutputStream.map( new File( tempOutputDirectory + N_FILE ),
             MapMode.READ_WRITE, (long) ( fastFile.length() * EXPECTED_COMPRESSION_RATIO * 2 ) );
-        headerfile = new BufferedOutputStream( new FileOutputStream( tempOutputDirectory +
-            SEQUENCE_ID_FILE ), DEFAULT_BUFFER );
-        iupacfile = new BufferedOutputStream( new FileOutputStream( tempOutputDirectory +
-            IUPAC_CODE_FILE ), DEFAULT_BUFFER );
-        tailfile = new BufferedOutputStream( new FileOutputStream( tempOutputDirectory +
-            SEQUENCE_TAIL_FILE ), DEFAULT_BUFFER );
+        headerfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + SEQUENCE_ID_FILE ), DEFAULT_BUFFER );
+        iupacfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + IUPAC_CODE_FILE ), DEFAULT_BUFFER );
+        tailfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + SEQUENCE_TAIL_FILE ), DEFAULT_BUFFER );
         metafile = new FileWriter( new File( tempOutputDirectory + META_FILE ) );
 
         metafile.write( format( META_FILE_SIZE_FORMAT, fastFile.length() ) );
@@ -262,7 +261,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                 }
                 dnaPosition.increment();
                 continue;
-                // Check for uppercase nucleotides
+            // Check for uppercase nucleotides
             case A:
             case C:
             case G:
@@ -391,8 +390,8 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
     }
 
     @SuppressWarnings ( "resource" )
-    protected void removeUnusedBufferSpace( final String tmpOutputDirectory ) throws IOException,
-    InterruptedException
+    protected void removeUnusedBufferSpace( final String tmpOutputDirectory )
+            throws IOException, InterruptedException
     {
         final long actualDataHcfFileSize = datahcf.position();
         final long actualNFileSize = nfile.position();

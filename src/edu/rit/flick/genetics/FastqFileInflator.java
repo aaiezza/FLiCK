@@ -7,8 +7,6 @@
 package edu.rit.flick.genetics;
 
 import static org.apache.commons.io.FileUtils.getFile;
-import it.unimi.dsi.io.ByteBufferInputStream;
-import it.unimi.dsi.lang.MutableString;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -17,6 +15,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+
+import it.unimi.dsi.io.ByteBufferInputStream;
+import it.unimi.dsi.lang.MutableString;
 
 /**
  * @author Alex Aiezza
@@ -39,8 +40,8 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
     @Override
     protected void beforeSequence() throws IOException
     {
-        previousHeader.replace( header.substring( header
-            .indexOf( (char) getSequenceIdentifierStart() ) + 1 ) );
+        previousHeader.replace(
+            header.substring( header.indexOf( (char) getSequenceIdentifierStart() ) + 1 ) );
         getNextLength();
     }
 
@@ -63,8 +64,9 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
     {
         super.createOutputFiles( tempOutputDirectory, fastFile );
 
-        lengthfile = new BufferedInputStream( new FileInputStream( getFile( tempOutputDirectory,
-            SEQUENCE_LENGTH_FILE ) ), DEFAULT_BUFFER )
+        lengthfile = new BufferedInputStream(
+                new FileInputStream( getFile( tempOutputDirectory, SEQUENCE_LENGTH_FILE ) ),
+                DEFAULT_BUFFER )
         {
             @Override
             public synchronized int read() throws IOException
@@ -74,8 +76,8 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
         };
         commentsfile = new Scanner( getFile( tempOutputDirectory, COMMENTS_FILE ) );
 
-        final FileInputStream scoreFis = new FileInputStream( getFile( tempOutputDirectory,
-            SEQUENCE_SCORE_FILE ) );
+        final FileInputStream scoreFis = new FileInputStream(
+                getFile( tempOutputDirectory, SEQUENCE_SCORE_FILE ) );
         scorefile = ByteBufferInputStream.map( scoreFis.getChannel() );
 
         scoreFis.close();
@@ -105,8 +107,8 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
     protected void parseProperties()
     {
         super.parseProperties();
-        commentTheSameAsSequenceId = Boolean.parseBoolean( (String) metafile
-            .get( META_COMMENT_SAME_AS_SEQUENCE_ID ) );
+        commentTheSameAsSequenceId = Boolean
+                .parseBoolean( (String) metafile.get( META_COMMENT_SAME_AS_SEQUENCE_ID ) );
         commentEmpty = Boolean.parseBoolean( (String) metafile.get( META_COMMENT_EMPTY ) );
     }
 

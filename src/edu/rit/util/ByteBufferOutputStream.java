@@ -6,9 +6,6 @@
  */
 package edu.rit.util;
 
-import it.unimi.dsi.fastutil.io.MeasurableOutputStream;
-import it.unimi.dsi.fastutil.io.RepositionableStream;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,6 +14,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
+
+import it.unimi.dsi.fastutil.io.MeasurableOutputStream;
+import it.unimi.dsi.fastutil.io.RepositionableStream;
 
 /**
  * @author Alex Aiezza

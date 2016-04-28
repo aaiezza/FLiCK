@@ -75,8 +75,8 @@ public class ByteConverterBiMapFactory
         // nucleotideIndex
         for ( final char element : NUCLEOTIDES )
         {
-            byteConverter
-            .put( permutation + element, (byte) permutationId.getAndAdd( 0x0000_0001 ) );
+            byteConverter.put( permutation + element,
+                (byte) permutationId.getAndAdd( 0x0000_0001 ) );
 
             fillConverterMap( permutation + element, permutationId, permutationLength,
                 byteConverter );

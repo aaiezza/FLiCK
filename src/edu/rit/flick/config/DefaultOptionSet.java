@@ -16,23 +16,22 @@ public class DefaultOptionSet extends AbstractOptionSet
     public static final boolean        DEFLATION_ARCHIVE_MODE = true;
     public static final boolean        INFLATION_ARCHIVE_MODE = false;
 
-    public static final Flag           ARCHIVE_MODE           = new DefaultFlag( "archive mode",
-        "", "",
-        DEFLATION_ARCHIVE_MODE );
+    public static final Flag           ARCHIVE_MODE           = new DefaultFlag( "archive mode", "",
+            "", DEFLATION_ARCHIVE_MODE );
 
-    public static final Flag           HELP_FLAG              = new DefaultFlag( "help", "help",
-        "", false );
-    public static final Flag           DELETE_FLAG            = new DefaultFlag( "delete",
-        "delete", "d", false );
+    public static final Flag           HELP_FLAG              = new DefaultFlag( "help", "help", "",
+            false );
+    public static final Flag           DELETE_FLAG            = new DefaultFlag( "delete", "delete",
+            "d", false );
     public static final Flag           VERBOSE_FLAG           = new DefaultFlag( "verbose",
-        "verbose", "v", false );
+            "verbose", "v", false );
     public static final Flag           FORCE_FLAG             = new DefaultFlag( "force", "force",
-        "f", false );
+            "f", false );
 
     public static final Option<String> INPUT_PATH             = new StringOption( "input path", "",
-        "", "" );
-    public static final Option<String> OUTPUT_PATH            = new StringOption( "output path",
-        "", "", null );
+            "", "" );
+    public static final Option<String> OUTPUT_PATH            = new StringOption( "output path", "",
+            "", null );
 
 
     {

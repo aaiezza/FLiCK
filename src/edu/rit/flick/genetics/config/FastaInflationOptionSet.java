@@ -17,7 +17,7 @@ import edu.rit.flick.config.InflationOptionSet;
 public class FastaInflationOptionSet extends InflationOptionSet
 {
     public static final Flag KEEP_ZIPPED_FA = new DefaultFlag( "keep zipped fa", "keep-zipped-fa",
-        "", false );
+            "", false );
 
     {
         options.add( KEEP_ZIPPED_FA );

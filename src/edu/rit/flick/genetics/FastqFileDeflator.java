@@ -56,10 +56,11 @@ public class FastqFileDeflator extends FastFileDeflator implements FastqFileArch
         scorefile = ByteBufferOutputStream.map(
             new File( tempOutputDirectory + SEQUENCE_SCORE_FILE ), MapMode.READ_WRITE,
             (long) ( fastqFile.length() * 2 * EXPECTED_COMPRESSION_RATIO ) );
-        lengthfile = new BufferedOutputStream( new FileOutputStream( tempOutputDirectory +
-            SEQUENCE_LENGTH_FILE ), DEFAULT_BUFFER );
-        commentsfile = new BufferedOutputStream( new FileOutputStream( tempOutputDirectory +
-            COMMENTS_FILE ), DEFAULT_BUFFER );
+        lengthfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + SEQUENCE_LENGTH_FILE ),
+                DEFAULT_BUFFER );
+        commentsfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + COMMENTS_FILE ), DEFAULT_BUFFER );
     }
 
     @Override
@@ -152,8 +153,8 @@ public class FastqFileDeflator extends FastFileDeflator implements FastqFileArch
 
     @SuppressWarnings ( "resource" )
     @Override
-    protected void removeUnusedBufferSpace( final String tmpOutputDirectory ) throws IOException,
-    InterruptedException
+    protected void removeUnusedBufferSpace( final String tmpOutputDirectory )
+            throws IOException, InterruptedException
     {
         super.removeUnusedBufferSpace( tmpOutputDirectory );
 

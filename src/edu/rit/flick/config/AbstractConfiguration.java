@@ -68,9 +68,9 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     private Option<? extends Object> getOptionFromString(
-        final String optionStr,
-        final Predicate<Option<? extends Object>> predicate )
-        {
+            final String optionStr,
+            final Predicate<Option<? extends Object>> predicate )
+    {
         for ( final Option<? extends Object> op : options.keySet() )
             if ( predicate.test( op ) )
                 return op;
@@ -80,7 +80,7 @@ public abstract class AbstractConfiguration implements Configuration
                 return op;
 
         return null;
-        }
+    }
 
     @Override
     public void registerOptionSet( final OptionSet<? extends Object> optionSet )

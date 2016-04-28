@@ -18,8 +18,8 @@ public interface FileDeflator extends FileArchiver
 {
     public default File deflate( final Configuration configuration, final File fileIn )
     {
-        return deflate( configuration, fileIn, new File( fileIn.getPath() +
-            getDefaultDeflatedExtension() ) );
+        return deflate( configuration, fileIn,
+            new File( fileIn.getPath() + getDefaultDeflatedExtension() ) );
     }
 
     public File deflate( final Configuration configuration, final File fileIn, final File fileOut );

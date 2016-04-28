@@ -7,8 +7,6 @@
 package edu.rit.flick.genetics;
 
 import static org.apache.commons.io.FileUtils.getFile;
-import it.unimi.dsi.io.ByteBufferInputStream;
-import it.unimi.dsi.lang.MutableString;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,9 +19,6 @@ import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.BiMap;
@@ -32,6 +27,10 @@ import com.google.common.io.Files;
 import edu.rit.flick.FileInflator;
 import edu.rit.flick.config.Configuration;
 import edu.rit.util.ByteBufferOutputStream;
+import it.unimi.dsi.io.ByteBufferInputStream;
+import it.unimi.dsi.lang.MutableString;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  * @author Alex Aiezza
@@ -60,6 +59,7 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
     protected char                      iupacBase               = 0x0;
 
     protected final MutableString       nucleotides             = new MutableString();
+    // @formatter:off
     protected final LongAdder           dnaPosition             = new LongAdder()
     {
         private static final long serialVersionUID = 1L;
@@ -69,18 +69,16 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
         {
             super.increment();
 
-            // Check
-            // for
-            // headerPosition
-            // index
+            // Check for headerPosition index
             if ( fastOut.position() == headerPosition )
                 writeNextHeader();
-                    else afterWriteNucleotide();
+            else afterWriteNucleotide();
 
-                    processSequence();
+            processSequence();
         }
 
     };
+    // @formatter:on
     protected final AtomicLong          seqDnaPosition          = new AtomicLong();
 
     private long                        fastFileSize;
@@ -129,8 +127,9 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
     protected void createOutputFiles( final String tempOutputDirectory, final File fastFile )
             throws IOException
     {
-        datahcf = ByteBufferInputStream.map( new FileInputStream( getFile( tempOutputDirectory,
-            SEQUENCE_DATA_FILE ) ).getChannel() );
+        datahcf = ByteBufferInputStream
+                .map( new FileInputStream( getFile( tempOutputDirectory, SEQUENCE_DATA_FILE ) )
+                        .getChannel() );
         nfile = new Scanner( getFile( tempOutputDirectory, N_FILE ) ).useDelimiter( "\\" + PIPE );
         headerfile = new Scanner( getFile( tempOutputDirectory, SEQUENCE_ID_FILE ) )
                 .useDelimiter( "" + NEWLINE );
@@ -199,9 +198,10 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                                                 : (char) NEWLINE );
             final String [] headInd = headerInfo.split( "\\" + PIPE, 2 );
             headerPosition = Long.parseLong( headInd[0] );
-            header.replace( ( containsCarriageReturns() ? (char) CARRIAGE_RETURN + "" +
-                    (char) NEWLINE : (char) NEWLINE ) +
-                    "" + (char) getSequenceIdentifierStart() + headInd[1] );
+            header.replace(
+                ( containsCarriageReturns() ? (char) CARRIAGE_RETURN + "" + (char) NEWLINE
+                                            : (char) NEWLINE ) +
+                        "" + (char) getSequenceIdentifierStart() + headInd[1] );
         } else header.replace( "" );
     }
 
@@ -340,8 +340,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
     protected void parseProperties()
     {
         fastFileSize = Long.parseLong( (String) metafile.get( META_FILE_SIZE ) );
-        containsCarriageReturns = Boolean.parseBoolean( (String) metafile
-            .get( META_CARRIAGE_RETURN ) );
+        containsCarriageReturns = Boolean
+                .parseBoolean( (String) metafile.get( META_CARRIAGE_RETURN ) );
         isRNAData = Boolean.parseBoolean( (String) metafile.get( META_RNA_DATA ) );
     }
 

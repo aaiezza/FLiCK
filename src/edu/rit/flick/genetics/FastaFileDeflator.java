@@ -193,8 +193,8 @@ public class FastaFileDeflator extends FastFileDeflator implements FastaFileArch
 
     @SuppressWarnings ( "resource" )
     @Override
-    public void removeUnusedBufferSpace( final String tmpOutputDirectory ) throws IOException,
-    InterruptedException
+    public void removeUnusedBufferSpace( final String tmpOutputDirectory )
+            throws IOException, InterruptedException
     {
         super.removeUnusedBufferSpace( tmpOutputDirectory );
 

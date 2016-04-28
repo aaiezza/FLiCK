@@ -17,7 +17,7 @@ import edu.rit.flick.config.InflationOptionSet;
 public class FastqInflationOptionSet extends InflationOptionSet
 {
     public static final Flag KEEP_ZIPPED_FQ = new DefaultFlag( "keep zipped fq", "keep-zipped-fq",
-        "", false );
+            "", false );
 
     {
         options.add( KEEP_ZIPPED_FQ );
