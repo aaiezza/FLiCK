@@ -17,6 +17,8 @@ import java.nio.file.NoSuchFileException;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.common.io.Files;
+
 import edu.rit.flick.config.Configuration;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -56,8 +58,14 @@ public abstract class AbstractFlickFile implements FlickFile
         final Object outputPath = configuration.getOption( OUTPUT_PATH );
 
         fileIn = new File( inputPath );
-        fileOut = new File( outputPath == null ? fileIn.getPath() + getDefaultDeflatedExtension()
-                                               : (String) outputPath );
+        fileOut = new File(
+                outputPath == null ? configuration
+                        .getFlag( ARCHIVE_MODE )
+                                                 ? fileIn.getPath() + getDefaultDeflatedExtension()
+                                                 : fileIn.getPath()
+                                                         .replaceAll( "." + Files.getFileExtension(
+                                                             fileIn.getPath() ), "" )
+                                   : (String) outputPath );
 
         if ( !fileIn.exists() )
             throw new NoSuchFileException( fileIn.getPath(), null,

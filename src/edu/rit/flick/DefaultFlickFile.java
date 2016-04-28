@@ -250,8 +250,8 @@ public class DefaultFlickFile extends AbstractFlickFile
         {
             for ( final FileInflator fi : fileInflators )
                 if ( fi.getExtensions().contains( fileExt ) )
-                    return Files.getFileExtension( fileIn.getPath().substring( 0,
-                        fileIn.getPath().indexOf( fi.getDefaultDeflatedExtension() ) ) );
+                    return Files.getFileExtension(
+                        fileIn.getPath().replaceAll( fi.getDefaultDeflatedExtension(), "" ) );
         }
 
         return DEFAULT_DEFLATED_EXTENSION;
