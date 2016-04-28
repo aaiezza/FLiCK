@@ -169,10 +169,14 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
         final StringTokenizer ns;
         if ( nfile.hasNext() )
         {
-            ns = new StringTokenizer( nfile.next(), RANGE );
-            nStart = Long.parseLong( ns.nextToken(), 16 );
-            nEnd = Long.parseLong( ns.nextToken(), 16 );
-            consecNs = nEnd - nStart;
+            final String line = nfile.next().trim();
+            if ( !line.isEmpty() )
+            {
+                ns = new StringTokenizer( line, RANGE );
+                nStart = Long.parseLong( ns.nextToken(), 16 );
+                nEnd = Long.parseLong( ns.nextToken(), 16 );
+                consecNs = nEnd - nStart;
+            }
         }
         // Check for nStart index
         if ( fastOut.position() > 0 && dnaPosition.longValue() == nStart )
