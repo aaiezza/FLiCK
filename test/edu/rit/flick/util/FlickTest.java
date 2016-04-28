@@ -21,7 +21,6 @@ import static org.apache.commons.io.FileUtils.getFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import it.unimi.dsi.io.ByteBufferInputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -29,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -40,9 +40,11 @@ import org.junit.rules.ExpectedException;
 
 import com.google.common.io.Files;
 
+import edu.rit.flick.AbstractFlickFile;
 import edu.rit.flick.DefaultFlickFile;
 import edu.rit.flick.genetics.FastaFileArchiver;
 import edu.rit.flick.genetics.FastqFileArchiver;
+import it.unimi.dsi.io.ByteBufferInputStream;
 
 /**
  *
@@ -101,8 +103,10 @@ public class FlickTest
         System.gc();
         Thread.sleep( 100 );
 
-        assertTrue( FileUtils.deleteQuietly( flickedFile ) );
-        assertTrue( FileUtils.deleteQuietly( unflickedFile ) );
+        if ( flickedFile != null && flickedFile.exists() )
+            assertTrue( FileUtils.deleteQuietly( flickedFile ) );
+        if ( unflickedFile != null && unflickedFile.exists() )
+            assertTrue( FileUtils.deleteQuietly( unflickedFile ) );
     }
 
     @Test
@@ -136,8 +140,8 @@ public class FlickTest
         outContent.reset();
 
         Flick.main( HELP_FLAG );
-        String expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +
-            Flick.FLICK_USAGE_FILE ), Charset.defaultCharset() );
+        String expectedUsageStatement = Files.toString(
+            new File( RESOURCES_FOLDER + Flick.FLICK_USAGE_FILE ), Charset.defaultCharset() );
         String actualUsageStatement = outContent.toString();
         assertEquals( expectedUsageStatement, actualUsageStatement );
 
@@ -145,16 +149,14 @@ public class FlickTest
         outContent.reset();
 
         Unflick.main( HELP_FLAG );
-        expectedUsageStatement = Files.toString( new File( RESOURCES_FOLDER +
-            Unflick.UNFLICK_USAGE_FILE ), Charset.defaultCharset() ) +
-            "\n";
+        expectedUsageStatement = Files.toString(
+            new File( RESOURCES_FOLDER + Unflick.UNFLICK_USAGE_FILE ), Charset.defaultCharset() ) +
+                "\n";
         actualUsageStatement = outContent.toString();
         assertEquals( expectedUsageStatement, actualUsageStatement );
 
         outContent.flush();
         outContent.reset();
-
-        exception.expect( AssertionError.class );
     }
 
     @Test
@@ -231,37 +233,33 @@ public class FlickTest
     {
         final String outputDirectory = directory + "-inflated";
         originalFile = getFile( TEST_RESOURCES_FOLDER, directory );
-        flickedFile = new File( TEST_RESOURCES_FOLDER + directory +
-            DefaultFlickFile.DEFAULT_DEFLATED_EXTENSION );
+        flickedFile = new File(
+                TEST_RESOURCES_FOLDER + directory + DefaultFlickFile.DEFAULT_DEFLATED_EXTENSION );
         unflickedFile = getFile( TEST_RESOURCES_FOLDER, outputDirectory );
 
         Flick.main( VERBOSE_FLAG, originalFile.getPath() );
 
         Unflick.main( VERBOSE_FLAG, flickedFile.getPath(), unflickedFile.getPath() );
 
-        Files.fileTreeTraverser()
-        .breadthFirstTraversal( originalFile )
-        .toList()
-        .stream()
-        .filter( file -> !file.isDirectory() )
-        .forEach(
-            file -> {
-                final String fileName1 = file.getPath().replaceAll(
-                    "((?!" + directory + ").+)" + directory + "(\\\\.+)",
-                    "$1" + outputDirectory );
-                final String fileName2 = file.getPath().replaceAll(
-                    "((?!" + directory + ").+)" + directory + "(\\\\.+)", directory + "$2" );
+        Files.fileTreeTraverser().breadthFirstTraversal( originalFile ).toList().stream()
+                .filter( file -> !file.isDirectory() ).forEach( file ->
+        {
+                    final String fileName1 = file.getPath().replaceAll(
+                        "((?!" + directory + ").+)" + directory + "(\\\\.+)",
+                        "$1" + outputDirectory );
+                    final String fileName2 = file.getPath().replaceAll(
+                        "((?!" + directory + ").+)" + directory + "(\\\\.+)", directory + "$2" );
 
-                assertEquals( file, getFile( fileName1, File.separator, fileName2 ) );
-            } );
+                    assertEquals( file, getFile( fileName1, File.separator, fileName2 ) );
+                } );
     }
 
     private final void testFASTAfile( final String fileBase )
     {
-        originalFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastaFileArchiver.FASTA_EXTENSION );
-        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
-            FastaFileArchiver.FASTA_EXTENSION +
-            FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION );
+        originalFile = getFile( TEST_RESOURCES_FOLDER,
+            fileBase + FastaFileArchiver.FASTA_EXTENSION );
+        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastaFileArchiver.FASTA_EXTENSION +
+                FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION );
         unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTA_EXTENSION );
 
         try
@@ -275,10 +273,10 @@ public class FlickTest
 
     private final void testFASTQfile( final String fileBase )
     {
-        originalFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastqFileArchiver.FASTQ_EXTENSION );
-        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase +
-            FastqFileArchiver.FASTQ_EXTENSION +
-            FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION );
+        originalFile = getFile( TEST_RESOURCES_FOLDER,
+            fileBase + FastqFileArchiver.FASTQ_EXTENSION );
+        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastqFileArchiver.FASTQ_EXTENSION +
+                FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION );
         unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTQ_EXTENSION );
 
         try
@@ -296,10 +294,29 @@ public class FlickTest
 
         Unflick.main( VERBOSE_FLAG, flickedFile.getPath(), unflickedFile.getPath() );
 
+        if ( !originalFile.exists() )
+        {
+            /*
+             * By falling in here, we assume the test failed because the file
+             * given as input was not found. Equally so, the flicked file will
+             * not be found by the unflicker since no flicking would have been
+             * able to occur.
+             */
+            final String expectedUsageStatement = String.format( "%s%n%s%n",
+                new NoSuchFileException( originalFile.getPath(), null,
+                        AbstractFlickFile.FILE_NOT_FOUND_EXCEPTION_MESSAGE ).getMessage().trim(),
+                new NoSuchFileException( flickedFile.getPath(), null,
+                        AbstractFlickFile.FILE_NOT_FOUND_EXCEPTION_MESSAGE ).getMessage().trim() );
+            final String actualUsageStatement = errContent.toString();
+            assertEquals( expectedUsageStatement, actualUsageStatement );
+            return;
+        }
+
         final FileInputStream origFIS = new FileInputStream( originalFile );
         ByteBufferInputStream orig = ByteBufferInputStream.map( origFIS.getChannel() );
         final FileInputStream comAndDecomFIS = new FileInputStream( unflickedFile );
-        ByteBufferInputStream comAndDecom = ByteBufferInputStream.map( comAndDecomFIS.getChannel() );
+        ByteBufferInputStream comAndDecom = ByteBufferInputStream
+                .map( comAndDecomFIS.getChannel() );
 
         if ( !FileUtils.contentEquals( originalFile, unflickedFile ) )
         {
@@ -309,9 +326,8 @@ public class FlickTest
                 position++;
                 final int o = orig.read();
                 final int c = comAndDecom.read();
-                assertEquals(
-                    format( FILES_DO_NOT_MATCH_ERROR_FORMAT, originalFile, unflickedFile, position ),
-                    (char) o + "", (char) c + "" );
+                assertEquals( format( FILES_DO_NOT_MATCH_ERROR_FORMAT, originalFile, unflickedFile,
+                    position ), (char) o + "", (char) c + "" );
             }
 
             assertEquals( orig.available(), comAndDecom.available() );

@@ -7,19 +7,21 @@
 package edu.rit.flick;
 
 import static edu.rit.flick.config.DefaultOptionSet.ARCHIVE_MODE;
+import static edu.rit.flick.config.DefaultOptionSet.FORCE_FLAG;
 import static edu.rit.flick.config.DefaultOptionSet.INPUT_PATH;
 import static edu.rit.flick.config.DefaultOptionSet.OUTPUT_PATH;
 
 import java.io.File;
-
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.NoSuchFileException;
 
 import org.apache.commons.io.FileUtils;
 
 import edu.rit.flick.config.Configuration;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 
 /**
  * @author Alex Aiezza
@@ -27,6 +29,12 @@ import edu.rit.flick.config.Configuration;
  */
 public abstract class AbstractFlickFile implements FlickFile
 {
+    public static final String    FILE_NOT_FOUND_EXCEPTION_MESSAGE               = "file not found";
+
+    private static final String   FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION     = "already exists as directory";
+
+    private static final String   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "can't overwrite existing file without --force flag";
+
     private final File            fileIn, fileOut;
 
     protected final Configuration configuration;
@@ -35,7 +43,10 @@ public abstract class AbstractFlickFile implements FlickFile
 
     protected final ZipParameters zParams;
 
-    public AbstractFlickFile( final Configuration configuration ) throws ZipException
+    public AbstractFlickFile( final Configuration configuration )
+        throws ZipException,
+        FileAlreadyExistsException,
+        NoSuchFileException
     {
         this.configuration = configuration;
 
@@ -46,8 +57,19 @@ public abstract class AbstractFlickFile implements FlickFile
         fileOut = new File( outputPath == null ? fileIn.getPath() + getDefaultDeflatedExtension()
                                                : (String) outputPath );
 
+        if ( !fileIn.exists() )
+            throw new NoSuchFileException( fileIn.getPath(), null,
+                    FILE_NOT_FOUND_EXCEPTION_MESSAGE );
+
         if ( fileOut.exists() )
+        {
+            if ( fileOut.isDirectory() )
+                throw new FileAlreadyExistsException( FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION );
+            if ( !configuration.getFlag( FORCE_FLAG ) )
+                throw new FileAlreadyExistsException( fileIn.getPath(), fileOut.getPath(),
+                        CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG );
             FileUtils.deleteQuietly( fileOut );
+        }
 
         flickFile = new ZipFile( configuration.getFlag( ARCHIVE_MODE ) ? fileOut : fileIn );
 

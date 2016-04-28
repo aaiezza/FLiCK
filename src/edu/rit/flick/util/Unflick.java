@@ -35,26 +35,26 @@ public class Unflick
     static
     {
         final StringBuilder usage = new StringBuilder();
-        final BufferedReader br = new BufferedReader( new InputStreamReader( Flick.class
-            .getClassLoader().getResourceAsStream( UNFLICK_USAGE_FILE ) ) );
+        final BufferedReader br = new BufferedReader( new InputStreamReader(
+                Flick.class.getClassLoader().getResourceAsStream( UNFLICK_USAGE_FILE ) ) );
         br.lines().forEach( line -> usage.append( line ).append( "\n" ) );
         USAGE_FORMAT = usage.toString();
     }
 
     public static void main( final String... args )
     {
+        final Configuration configuration = new InflationConfiguration();
+        ConfigurationProcessor.processConfiguration( configuration, args );
+        configuration.setFlag( ARCHIVE_MODE, INFLATION_ARCHIVE_MODE );
+
+        if ( args.length <= 0 || configuration.getFlag( HELP_FLAG ) )
+        {
+            USAGE();
+            return;
+        }
+
         try
         {
-            final Configuration configuration = new InflationConfiguration();
-            ConfigurationProcessor.processConfiguration( configuration, args );
-            configuration.setFlag( ARCHIVE_MODE, INFLATION_ARCHIVE_MODE );
-
-            if ( args.length <= 0 || configuration.getFlag( HELP_FLAG ) )
-            {
-                USAGE();
-                return;
-            }
-
             final FlickFile flickFile = new DefaultFlickFile( configuration );
 
             flickFile.inflate();
@@ -62,8 +62,6 @@ public class Unflick
         } catch ( final Exception e )
         {
             System.err.println( e.getMessage().trim() );
-            e.printStackTrace();
-            System.err.println();
         }
     }
 

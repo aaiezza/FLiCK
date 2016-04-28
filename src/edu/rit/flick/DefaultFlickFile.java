@@ -17,19 +17,14 @@ import static edu.rit.flick.config.InflationOptionSet.KEEP_ZIPPED_FLAG;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import net.lingala.zip4j.core.HeaderReader;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.CentralDirectory;
-import net.lingala.zip4j.model.FileHeader;
-import net.lingala.zip4j.model.ZipModel;
-import net.lingala.zip4j.util.InternalZipConstants;
 
 import org.apache.commons.io.FileUtils;
 
@@ -40,6 +35,12 @@ import edu.rit.flick.genetics.FastaFileDeflator;
 import edu.rit.flick.genetics.FastaFileInflator;
 import edu.rit.flick.genetics.FastqFileDeflator;
 import edu.rit.flick.genetics.FastqFileInflator;
+import net.lingala.zip4j.core.HeaderReader;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.CentralDirectory;
+import net.lingala.zip4j.model.FileHeader;
+import net.lingala.zip4j.model.ZipModel;
+import net.lingala.zip4j.util.InternalZipConstants;
 
 /**
  * @author Alex Aiezza
@@ -66,8 +67,13 @@ public class DefaultFlickFile extends AbstractFlickFile
     /**
      * @param configuration
      * @throws ZipException
+     * @throws FileAlreadyExistsException
+     * @throws NoSuchFileException
      */
-    public DefaultFlickFile( final Configuration configuration ) throws ZipException
+    public DefaultFlickFile( final Configuration configuration )
+        throws ZipException,
+        FileAlreadyExistsException,
+        NoSuchFileException
     {
         super( configuration );
 
@@ -110,8 +116,8 @@ public class DefaultFlickFile extends AbstractFlickFile
                         {
                             final long t1 = System.currentTimeMillis();
                             if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
-                                archivedFile = deflator.deflate( configuration, file, new File(
-                                    (String) configuration.getOption( OUTPUT_PATH ) ) );
+                                archivedFile = deflator.deflate( configuration, file,
+                                    new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
                             else archivedFile = deflator.deflate( configuration, file );
                             time = ( System.currentTimeMillis() - t1 ) / 1000d;
                         }
@@ -122,8 +128,8 @@ public class DefaultFlickFile extends AbstractFlickFile
                         {
                             final long t1 = System.currentTimeMillis();
                             if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
-                                archivedFile = inflator.inflate( configuration, file, new File(
-                                    (String) configuration.getOption( OUTPUT_PATH ) ) );
+                                archivedFile = inflator.inflate( configuration, file,
+                                    new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
                             else archivedFile = inflator.inflate( configuration, file );
                             time = ( System.currentTimeMillis() - t1 ) / 1000d;
                         }
@@ -145,7 +151,8 @@ public class DefaultFlickFile extends AbstractFlickFile
                     {
                         // Get the percent deflation on the compressed file
                         final double percDeflated = 100 *
-                                (double) FileUtils.sizeOf( archivedFile ) / FileUtils.sizeOf( file );
+                                (double) FileUtils.sizeOf( archivedFile ) /
+                                FileUtils.sizeOf( file );
 
                         System.out.printf( VERBOSE_DECOMPRESSION_INFO_FORMAT, file.getName(), time,
                             percDeflated );
@@ -191,8 +198,8 @@ public class DefaultFlickFile extends AbstractFlickFile
             for ( final File file : compressedFiles )
             {
                 String path = file.getPath();
-                path = path
-                        .substring( path.lastIndexOf( fileIn.getName() ), path.lastIndexOf( "." ) );
+                path = path.substring( path.lastIndexOf( fileIn.getName() ),
+                    path.lastIndexOf( "." ) );
                 flickFile.removeFile( path );
             }
 
@@ -210,9 +217,8 @@ public class DefaultFlickFile extends AbstractFlickFile
             if ( !compressSingleFile && configuration.getFlag( VERBOSE_FLAG ) )
             {
                 // Get the percent deflation on the compressed file
-                final double percDeflated = 100 *
-                        ( (double) inputPathSize - (double) FileUtils.sizeOf( flickFile.getFile() ) ) /
-                        inputPathSize;
+                final double percDeflated = 100 * ( (double) inputPathSize -
+                        (double) FileUtils.sizeOf( flickFile.getFile() ) ) / inputPathSize;
 
                 System.out.printf( VERBOSE_COMPRESSION_INFO_FORMAT, fileIn.getName(), overallTime,
                     percDeflated );
@@ -270,33 +276,30 @@ public class DefaultFlickFile extends AbstractFlickFile
             final ZipModel zm = hr.readAllHeaders();
             final CentralDirectory centralDirectory = zm.getCentralDirectory();
             @SuppressWarnings ( "unchecked" )
-            final List<FileHeader> fhs = Collections.checkedList(
-                centralDirectory.getFileHeaders(), FileHeader.class );
+            final List<FileHeader> fhs = Collections.checkedList( centralDirectory.getFileHeaders(),
+                FileHeader.class );
 
-            final List<File> files = fhs
-                    .stream()
-                    .map(
-                        fh -> {
-                            final File file = FileUtils.getFile( fileOut.getPath(), File.separator,
-                                fh.getFileName() );
-                            unzippedContentsSize.add( file.length() );
-                            return file;
-                        } ).collect( Collectors.toList() );
+            final List<File> files = fhs.stream().map( fh -> {
+                final File file = FileUtils.getFile( fileOut.getPath(), File.separator,
+                    fh.getFileName() );
+                unzippedContentsSize.add( file.length() );
+                return file;
+            } ).collect( Collectors.toList() );
 
             if ( !configuration.getFlag( KEEP_ZIPPED_FLAG ) )
                 // Traverse directory and look for files to decompress
                 for ( final File file : files )
                 {
-                    File decompressedFile = null;
-                    if ( !file.isDirectory() )
-                        decompressedFile = archiveFile( file, false );
+                File decompressedFile = null;
+                if ( !file.isDirectory() )
+                decompressedFile = archiveFile( file, false );
 
-                    if ( decompressedFile != null )
-                    {
-                        unzippedContentsSize.add( -FileUtils.sizeOf( file ) );
-                        unzippedContentsSize.add( FileUtils.sizeOf( decompressedFile ) );
-                        file.delete();
-                    }
+                if ( decompressedFile != null )
+                {
+                unzippedContentsSize.add( -FileUtils.sizeOf( file ) );
+                unzippedContentsSize.add( FileUtils.sizeOf( decompressedFile ) );
+                file.delete();
+                }
                 }
 
             raf.close();
@@ -313,8 +316,8 @@ public class DefaultFlickFile extends AbstractFlickFile
                 final double percDeflated = 100 * unzippedContentsSize.doubleValue() /
                         inputFileSize;
 
-                System.out.printf( VERBOSE_DECOMPRESSION_INFO_FORMAT, fileIn.getName(),
-                    overallTime, percDeflated );
+                System.out.printf( VERBOSE_DECOMPRESSION_INFO_FORMAT, fileIn.getName(), overallTime,
+                    percDeflated );
             }
         } catch ( final Exception e )
         {
