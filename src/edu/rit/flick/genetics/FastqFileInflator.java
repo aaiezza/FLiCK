@@ -48,9 +48,12 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
     @Override
     protected void close() throws IOException, InterruptedException
     {
-        lengthfile.close();
-        commentsfile.close();
-        scorefile.close();
+        if ( lengthfile != null )
+            lengthfile.close();
+        if ( commentsfile != null )
+            commentsfile.close();
+        if ( scorefile != null )
+            scorefile.close();
 
         scorefile = null;
 

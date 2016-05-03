@@ -52,7 +52,8 @@ public class FastaFileInflator extends FastFileInflator implements FastaFileArch
     protected void close() throws IOException, InterruptedException
     {
         super.close();
-        tandemFile.close();
+        if ( tandemFile != null )
+            tandemFile.close();
     }
 
     @SuppressWarnings ( "resource" )

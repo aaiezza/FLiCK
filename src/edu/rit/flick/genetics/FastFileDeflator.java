@@ -164,7 +164,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                 } catch ( final Exception e )
                 {
                     if ( !interrupted )
-                        e.printStackTrace();
+                        System.err.println( e.getMessage() );
                 }
             }, "Default_Deflation_Thread" );
 

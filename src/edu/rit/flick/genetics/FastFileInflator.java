@@ -6,8 +6,8 @@
  */
 package edu.rit.flick.genetics;
 
-import static edu.rit.flick.config.DefaultOptionSet.VERBOSE_FLAG;
 import static edu.rit.flick.config.DefaultOptionSet.DELETE_FLAG;
+import static edu.rit.flick.config.DefaultOptionSet.VERBOSE_FLAG;
 import static org.apache.commons.io.FileUtils.getFile;
 
 import java.io.File;
@@ -107,6 +107,9 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
 
     protected void close() throws IOException, InterruptedException
     {
+        if ( fastOut == null )
+            return;
+
         fastOut.close();
         iupacfile.close();
         datahcf.close();
@@ -227,7 +230,10 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
     }
 
     @Override
-    public File inflate( final Configuration configuration, final File fileIn, final File fileOut )
+    public synchronized File inflate(
+            final Configuration configuration,
+            final File fileIn,
+            final File fileOut )
     {
         assert fileIn.exists();
 
@@ -264,7 +270,7 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                 } catch ( final Exception e )
                 {
                     if ( !interrupted )
-                        e.printStackTrace();
+                        System.err.println( e.getMessage() );
                 }
             }, "Default_Inflation_Thread" );
 
@@ -275,19 +281,32 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                 configuration.setFlag( DELETE_FLAG, false );
                 try
                 {
+                    if ( inflateToDirectoryThread.isAlive() )
+                        inflateToDirectoryThread.interrupt();
+
                     // Clean up IO
                     close();
                     System.gc();
                     Thread.sleep( 100 );
 
-                    // Clean up temporary directory
-                    FileUtils.deleteDirectory( tmpOutputDirectory );
-                    // Clean up INCOMPLETE output file
-                    FileUtils.deleteQuietly( fileOut );
+                    synchronized ( this )
+                    {
+                        while ( inflateToDirectoryThread.isAlive() )
+                            this.wait();
+                    }
+
                 } catch ( final IOException | InterruptedException e )
                 {
                     e.printStackTrace();
+                } finally
+                {
+                    // Clean up temporary directory
+                    FileUtils.deleteQuietly( tmpOutputDirectory );
+                    // Clean up INCOMPLETE output file
+                    FileUtils.deleteQuietly( fileOut );
+                    System.out.println();
                 }
+
             }, "Inflation_Cleaning_Thread" );
 
             cleanHookAtomic.set( cleanHook );
@@ -342,7 +361,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
             zipFile.extractAll( tmpOutputDirectory.getPath() );
         } catch ( final ZipException e )
         {
-            e.printStackTrace();
+            if ( !interrupted )
+                System.err.println( e.getMessage() );
         }
 
         return tmpOutputDirectory;
@@ -423,7 +443,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
             seqDnaPosition.set( 0 );
         } catch ( final IOException e )
         {
-            e.printStackTrace();
+            if ( !interrupted )
+                e.printStackTrace();
         }
     }
 
@@ -454,7 +475,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
             fastOut.write( nucleotide );
         } catch ( final IOException e )
         {
-            e.printStackTrace();
+            if ( !interrupted )
+                System.err.println( e.getMessage() );
         }
         dnaPosition.increment();
     }
