@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 group = 'rit'
-version = 0.2
+version = 0.3
 jar.baseName = 'flick'
 // def uploadSite = 'ftp.bioinformatics.rit.edu'
 
