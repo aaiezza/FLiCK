@@ -263,6 +263,7 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
 
             // Make cleaning hook
             final Thread cleanHook = new Thread( () -> {
+                interrupted = true;
                 try
                 {
                     // Clean up IO
@@ -278,6 +279,8 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                     e.printStackTrace();
                 }
             }, "Inflation_Cleaning_Thread" );
+
+            cleanHookAtomic.set( cleanHook );
 
             Runtime.getRuntime().addShutdownHook( cleanHook );
 
