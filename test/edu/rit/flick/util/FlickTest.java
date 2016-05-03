@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.NoSuchFileException;
+import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -307,7 +308,10 @@ public class FlickTest
                         AbstractFlickFile.FILE_NOT_FOUND_EXCEPTION_MESSAGE ).getMessage().trim(),
                 new NoSuchFileException( flickedFile.getPath(), null,
                         AbstractFlickFile.FILE_NOT_FOUND_EXCEPTION_MESSAGE ).getMessage().trim() );
-            final String actualUsageStatement = errContent.toString();
+            final Object [] errorStack = errContent.toString().split( "\n" );
+            final int eSl = errorStack.length;
+            final String actualUsageStatement = String.format( "%s\n%s\n",
+                Arrays.copyOfRange( errorStack, eSl - 2, eSl ) );
             assertEquals( expectedUsageStatement, actualUsageStatement );
             return;
         }

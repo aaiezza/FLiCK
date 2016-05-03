@@ -35,7 +35,7 @@ public abstract class AbstractFlickFile implements FlickFile
 
     private static final String   FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION     = "already exists as directory";
 
-    private static final String   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "can't overwrite existing file without --force flag";
+    private static final String   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "\n  can't overwrite existing file without --force flag";
 
     protected final File          fileIn, fileOut;
 
