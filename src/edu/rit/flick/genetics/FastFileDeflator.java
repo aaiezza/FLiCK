@@ -6,6 +6,7 @@
  */
 package edu.rit.flick.genetics;
 
+import static edu.rit.flick.config.DefaultOptionSet.VERBOSE_FLAG;
 import static java.lang.String.format;
 
 import java.io.BufferedOutputStream;
@@ -18,6 +19,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 
 import org.apache.commons.io.FileUtils;
@@ -41,6 +43,8 @@ import net.lingala.zip4j.util.Zip4jConstants;
 public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
 {
     public final static double          EXPECTED_COMPRESSION_RATIO = 0.25;
+
+    private boolean                     interrupted                = false;
 
     // Output files
     protected ByteBufferOutputStream    datahcf;
@@ -131,7 +135,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
 
         try
         {
-            // Compress to Directory
+            // Deflate to Directory
             final String outputDirectoryPath = fileOut.getPath().replaceAll(
                 "." + Files.getFileExtension( fileOut.getPath() ), FLICK_FAST_FILE_TMP_DIR_SUFFIX );
 
@@ -140,30 +144,56 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                 FileUtils.deleteDirectory( tmpOutputDirectory );
             tmpOutputDirectory.mkdirs();
 
-            // Make cleaning hook
-            final Thread cleanHook = new Thread( () -> {
+            final AtomicReference<Thread> cleanHookAtomic = new AtomicReference<Thread>();
+
+            // Deflate Fast file to a temporary directory
+            final Thread deflateToDirectoryThread = new Thread( () -> {
                 try
                 {
+                    // Deflate Fast file to a temporary directory
+                    deflateToDirectory( fileIn, tmpOutputDirectory );
+
                     // Remove unused buffer space
                     removeUnusedBufferSpace( outputDirectoryPath );
 
                     // Compress Directory to a zip file
                     deflateToFile( tmpOutputDirectory, fileOut );
-                } catch ( final IOException | ZipException | InterruptedException e )
+
+                    Runtime.getRuntime().removeShutdownHook( cleanHookAtomic.get() );
+                } catch ( final Exception e )
+                {
+                    if ( !interrupted )
+                        e.printStackTrace();
+                }
+            }, "Default_Deflation_Thread" );
+
+            // Make cleaning hook
+            final Thread cleanHook = new Thread( () -> {
+                interrupted = true;
+                configuration.setFlag( VERBOSE_FLAG, false );
+                try
+                {
+                    if ( deflateToDirectoryThread.isAlive() )
+                        deflateToDirectoryThread.interrupt();
+
+                    // Remove unused buffer space
+                    removeUnusedBufferSpace( outputDirectoryPath );
+
+                    // Delete files that were not able to be processed
+                    FileUtils.deleteQuietly( tmpOutputDirectory );
+                    System.out.println();
+                } catch ( final IOException | InterruptedException e )
                 {
                     e.printStackTrace();
                 }
-            } );
+            }, "Deflation_Cleaning_Thread" );
+
+            cleanHookAtomic.set( cleanHook );
 
             Runtime.getRuntime().addShutdownHook( cleanHook );
 
-            // Deflate Fast file to a temporary directory
-            deflateToDirectory( fileIn, tmpOutputDirectory );
-
-            cleanHook.start();
-            cleanHook.join();
-
-            Runtime.getRuntime().removeShutdownHook( cleanHook );
+            deflateToDirectoryThread.start();
+            deflateToDirectoryThread.join();
 
         } catch ( final IOException | InterruptedException e )
         {
