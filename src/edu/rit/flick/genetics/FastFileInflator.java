@@ -283,7 +283,7 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                     // Clean up temporary directory
                     FileUtils.deleteDirectory( tmpOutputDirectory );
                     // Clean up INCOMPLETE output file
-                    FileUtils.deleteDirectory( fileOut );
+                    FileUtils.deleteQuietly( fileOut );
                 } catch ( final IOException | InterruptedException e )
                 {
                     e.printStackTrace();
