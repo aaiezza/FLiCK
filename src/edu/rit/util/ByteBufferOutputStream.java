@@ -204,7 +204,7 @@ public class ByteBufferOutputStream extends MeasurableOutputStream implements Re
     }
 
     @Override
-    public void close() throws IOException
+    public synchronized void close() throws IOException
     {
         for ( int b = 0; b < byteBuffer.length; b++ )
         {
@@ -220,9 +220,11 @@ public class ByteBufferOutputStream extends MeasurableOutputStream implements Re
                 cleaner.setAccessible( true );
                 final Method clean = Class.forName( "sun.misc.Cleaner" ).getMethod( "clean" );
                 clean.setAccessible( true );
-                clean.invoke( cleaner.invoke( byteBuffer[b] ) );
+                // clean.invoke( cleaner.invoke( byteBuffer[b] ) );
             } catch ( final Exception ex )
             {}
+            byteBuffer[b].flip();
+            byteBuffer[b].clear();
             byteBuffer[b] = null;
         }
         System.gc();
