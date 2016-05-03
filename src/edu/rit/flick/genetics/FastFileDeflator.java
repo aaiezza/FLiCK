@@ -6,6 +6,7 @@
  */
 package edu.rit.flick.genetics;
 
+import static edu.rit.flick.config.DefaultOptionSet.DELETE_FLAG;
 import static edu.rit.flick.config.DefaultOptionSet.VERBOSE_FLAG;
 import static java.lang.String.format;
 
@@ -171,6 +172,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
             final Thread cleanHook = new Thread( () -> {
                 interrupted = true;
                 configuration.setFlag( VERBOSE_FLAG, false );
+                configuration.setFlag( DELETE_FLAG, false );
                 try
                 {
                     if ( deflateToDirectoryThread.isAlive() )

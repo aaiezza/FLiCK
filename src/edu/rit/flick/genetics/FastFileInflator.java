@@ -6,6 +6,8 @@
  */
 package edu.rit.flick.genetics;
 
+import static edu.rit.flick.config.DefaultOptionSet.VERBOSE_FLAG;
+import static edu.rit.flick.config.DefaultOptionSet.DELETE_FLAG;
 import static org.apache.commons.io.FileUtils.getFile;
 
 import java.io.File;
@@ -250,8 +252,13 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
                     // Inflate Directory to a zip file
                     inflateFromDirectory( tmpOutputDirectory, fileOut );
 
-                    cleanHookAtomic.get().start();
-                    cleanHookAtomic.get().join();
+                    // Clean up IO
+                    close();
+                    System.gc();
+                    Thread.sleep( 100 );
+
+                    // Clean up temporary directory
+                    FileUtils.deleteDirectory( tmpOutputDirectory );
 
                     Runtime.getRuntime().removeShutdownHook( cleanHookAtomic.get() );
                 } catch ( final Exception e )
@@ -264,16 +271,19 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
             // Make cleaning hook
             final Thread cleanHook = new Thread( () -> {
                 interrupted = true;
+                configuration.setFlag( VERBOSE_FLAG, false );
+                configuration.setFlag( DELETE_FLAG, false );
                 try
                 {
                     // Clean up IO
                     close();
-
                     System.gc();
                     Thread.sleep( 100 );
 
                     // Clean up temporary directory
                     FileUtils.deleteDirectory( tmpOutputDirectory );
+                    // Clean up INCOMPLETE output file
+                    FileUtils.deleteDirectory( fileOut );
                 } catch ( final IOException | InterruptedException e )
                 {
                     e.printStackTrace();
