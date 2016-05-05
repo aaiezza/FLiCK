@@ -30,7 +30,7 @@ import com.google.common.io.Files;
 
 import edu.rit.flick.FileDeflator;
 import edu.rit.flick.config.Configuration;
-import edu.rit.util.ByteBufferOutputStream;
+import edu.rit.flick.genetics.util.ByteBufferOutputStream;
 import it.unimi.dsi.io.ByteBufferInputStream;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;

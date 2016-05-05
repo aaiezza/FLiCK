@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-import edu.rit.util.HexPrinter;
+import edu.rit.flick.genetics.util.HexPrinter;
 
 /**
  * @author Alex Aiezza

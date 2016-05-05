@@ -4,7 +4,7 @@
  *  See the LICENSE for the specific language governing permissions and
  *  limitations under the License provided with this project.
  */
-package edu.rit.util;
+package edu.rit.flick.genetics.util;
 
 import static java.lang.Integer.toHexString;
 

@@ -29,7 +29,7 @@ import com.google.common.io.Files;
 
 import edu.rit.flick.FileInflator;
 import edu.rit.flick.config.Configuration;
-import edu.rit.util.ByteBufferOutputStream;
+import edu.rit.flick.genetics.util.ByteBufferOutputStream;
 import it.unimi.dsi.io.ByteBufferInputStream;
 import it.unimi.dsi.lang.MutableString;
 import net.lingala.zip4j.core.ZipFile;

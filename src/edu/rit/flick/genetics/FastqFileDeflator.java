@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import edu.rit.util.ByteBufferOutputStream;
-import edu.rit.util.HexPrinter;
+import edu.rit.flick.genetics.util.ByteBufferOutputStream;
+import edu.rit.flick.genetics.util.HexPrinter;
 
 /**
  * @author Alex Aiezza

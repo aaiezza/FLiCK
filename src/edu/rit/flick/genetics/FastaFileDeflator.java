@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import edu.rit.util.ByteBufferOutputStream;
+import edu.rit.flick.genetics.util.ByteBufferOutputStream;
 
 /**
  * @author Alex Aiezza
