@@ -2,11 +2,11 @@ Flick v{{version}}
 Usage: unflick [-options] FLICK_FILE [OUTPUT_PATH]
 
 where options include:
-    --keep-zipped      unflick will compress PATH without compressing encountered
+    --keep-zipped      unflick will compress PATH without decompressing encountered
                          FASTA or FASTQ files
-    --keep-zipped-fa   unflick will compress PATH without compressing encountered
+    --keep-zipped-fa   unflick will compress PATH without decompressing encountered
                          FASTA files
-    --keep-zipped-fq   unflick will compress PATH without compressing encountered
+    --keep-zipped-fq   unflick will compress PATH without decompressing encountered
                          FASTQ files
 
     -d --delete        delete FLICK_FILE after decompression
