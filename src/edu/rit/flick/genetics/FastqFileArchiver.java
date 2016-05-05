@@ -8,10 +8,22 @@ package edu.rit.flick.genetics;
 
 import static java.lang.String.format;
 
+import edu.rit.flick.RegisterFileDeflatorInflator;
+import edu.rit.flick.genetics.config.FastqDeflationOptionSet;
+import edu.rit.flick.genetics.config.FastqInflationOptionSet;
+
 /**
  * @author Alex Aiezza
  *
  */
+@RegisterFileDeflatorInflator (
+    deflatedExtension = FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION,
+    inflatedExtensions =
+{ "fq", "fastq" },
+    fileDeflator = FastqFileDeflator.class,
+    fileInflator = FastqFileInflator.class,
+    fileDeflatorOptionSet = FastqDeflationOptionSet.class,
+    fileInflatorOptionSet = FastqInflationOptionSet.class )
 public interface FastqFileArchiver extends FastFileArchiver
 {
     public static final String SEQUENCE_SCORE_FILE                     = "Scores.txt";
@@ -20,8 +32,6 @@ public interface FastqFileArchiver extends FastFileArchiver
 
     public static final byte   SEQUENCE_ID_START                       = '@';
     public static final byte   COMMENT_START                           = '+';
-
-    public static final String FASTQ_EXTENSION                         = ".fq";
 
     public static final String DEFAULT_DEFLATED_FASTQ_EXTENSION        = ".flickfq";
 

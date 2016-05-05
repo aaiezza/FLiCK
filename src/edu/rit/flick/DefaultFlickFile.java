@@ -24,17 +24,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.io.Files;
 
 import edu.rit.flick.config.Configuration;
-import edu.rit.flick.genetics.FastaFileDeflator;
-import edu.rit.flick.genetics.FastaFileInflator;
-import edu.rit.flick.genetics.FastqFileDeflator;
-import edu.rit.flick.genetics.FastqFileInflator;
 import net.lingala.zip4j.core.HeaderReader;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.CentralDirectory;
@@ -60,10 +55,6 @@ public class DefaultFlickFile extends AbstractFlickFile
 
     private static final String FILE_COULD_NOT_BE_DELETED_WARNING_FORMAT = "File '%s' could not be deleted.%n";
 
-    private List<FileDeflator>  fileDeflators;
-
-    private List<FileInflator>  fileInflators;
-
     /**
      * @param configuration
      * @throws ZipException
@@ -78,31 +69,6 @@ public class DefaultFlickFile extends AbstractFlickFile
         super( configuration );
     }
 
-    @Override
-    protected void init()
-    {
-        fileDeflators = new ArrayList<FileDeflator>();
-        fileInflators = new ArrayList<FileInflator>();
-
-        if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE )
-            addDefaultFileDeflators();
-        else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE )
-            addDefaultFileInflators();
-    }
-
-
-    private final void addDefaultFileDeflators()
-    {
-        registerFileDeflator( new FastaFileDeflator() );
-        registerFileDeflator( new FastqFileDeflator() );
-    }
-
-    private final void addDefaultFileInflators()
-    {
-        registerFileInflator( new FastaFileInflator() );
-        registerFileInflator( new FastqFileInflator() );
-    }
-
     private File archiveFile( final File file, final boolean onlyFile )
     {
         double time = 0;
@@ -112,32 +78,33 @@ public class DefaultFlickFile extends AbstractFlickFile
         {
             final String fileExt = "." + Files.getFileExtension( file.getPath() );
 
-            if ( getExtensions().contains( fileExt ) )
-                if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE &&
-                        !configuration.getFlag( NO_ZIP_FLAG ) )
+            if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE &&
+                    !configuration.getFlag( NO_ZIP_FLAG ) )
+            {
+                final FileDeflator fileDeflator = REGISTRY.getFileDeflator( fileExt );
+                if ( fileDeflator != null )
                 {
-                    for ( final FileDeflator deflator : fileDeflators )
-                        if ( deflator.getExtensions().contains( fileExt ) )
-                        {
-                            final long t1 = System.currentTimeMillis();
-                            if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
-                                archivedFile = deflator.deflate( configuration, file,
-                                    new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
-                            else archivedFile = deflator.deflate( configuration, file );
-                            time = ( System.currentTimeMillis() - t1 ) / 1000d;
-                        }
-                } else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE &&
-                        !configuration.getFlag( KEEP_ZIPPED_FLAG ) )
-                    for ( final FileInflator inflator : fileInflators )
-                        if ( inflator.getExtensions().contains( fileExt ) )
-                        {
-                            final long t1 = System.currentTimeMillis();
-                            if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
-                                archivedFile = inflator.inflate( configuration, file,
-                                    new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
-                            else archivedFile = inflator.inflate( configuration, file );
-                            time = ( System.currentTimeMillis() - t1 ) / 1000d;
-                        }
+                    final long t1 = System.currentTimeMillis();
+                    if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
+                        archivedFile = fileDeflator.deflate( configuration, file,
+                            new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
+                    else archivedFile = fileDeflator.deflate( configuration, file );
+                    time = ( System.currentTimeMillis() - t1 ) / 1000d;
+                }
+            } else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE &&
+                    !configuration.getFlag( KEEP_ZIPPED_FLAG ) )
+            {
+                final FileInflator fileInflator = REGISTRY.getFileInflator( fileExt );
+                if ( fileInflator != null )
+                {
+                    final long t1 = System.currentTimeMillis();
+                    if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
+                        archivedFile = fileInflator.inflate( configuration, file,
+                            new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
+                    else archivedFile = fileInflator.inflate( configuration, file );
+                    time = ( System.currentTimeMillis() - t1 ) / 1000d;
+                }
+            }
 
             if ( archivedFile != null )
                 if ( configuration.getFlag( VERBOSE_FLAG ) )
@@ -241,27 +208,16 @@ public class DefaultFlickFile extends AbstractFlickFile
     {
         final String fileExt = "." + Files.getFileExtension( fileIn.getPath() );
 
-        if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE )
-        {
-            for ( final FileDeflator fd : fileDeflators )
-                if ( fd.getExtensions().contains( fileExt ) )
-                    return fd.getDefaultDeflatedExtension();
-        } else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE )
-        {
-            for ( final FileInflator fi : fileInflators )
-                if ( fi.getExtensions().contains( fileExt ) )
-                    return Files.getFileExtension(
-                        fileIn.getPath().replaceAll( fi.getDefaultDeflatedExtension(), "" ) );
-        }
+        final String deflatedExtension = REGISTRY.getDeflatedExtension( fileExt );
+
+        if ( deflatedExtension != null )
+            if ( configuration.getFlag( ARCHIVE_MODE ) == DEFLATION_ARCHIVE_MODE )
+                return deflatedExtension;
+            else if ( configuration.getFlag( ARCHIVE_MODE ) == INFLATION_ARCHIVE_MODE )
+                return Files
+                        .getFileExtension( fileIn.getPath().replaceAll( deflatedExtension, "" ) );
 
         return DEFAULT_DEFLATED_EXTENSION;
-    }
-
-    @Override
-    public List<String> getExtensions()
-    {
-        return Stream.concat( fileInflators.stream(), fileDeflators.stream() )
-                .flatMap( fA -> fA.getExtensions().stream() ).collect( Collectors.toList() );
     }
 
     @Override
@@ -345,26 +301,5 @@ public class DefaultFlickFile extends AbstractFlickFile
         }
 
         return fileOut;
-    }
-
-    private <F extends FileArchiver> void registerFileArchiver(
-            final F fileArchiver,
-            final List<F> fileArchivers )
-    {
-        if ( fileArchivers.contains( fileArchiver ) )
-            // TODO nope
-            return;
-
-        fileArchivers.add( fileArchiver );
-    }
-
-    public void registerFileDeflator( final FileDeflator fileDeflator )
-    {
-        registerFileArchiver( fileDeflator, fileDeflators );
-    }
-
-    public void registerFileInflator( final FileInflator fileInflator )
-    {
-        registerFileArchiver( fileInflator, fileInflators );
     }
 }

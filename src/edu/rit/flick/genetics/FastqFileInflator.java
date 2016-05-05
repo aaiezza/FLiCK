@@ -12,8 +12,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Scanner;
 
 import it.unimi.dsi.io.ByteBufferInputStream;
@@ -84,12 +82,6 @@ public class FastqFileInflator extends FastFileInflator implements FastqFileArch
         scorefile = ByteBufferInputStream.map( scoreFis.getChannel() );
 
         scoreFis.close();
-    }
-
-    @Override
-    public List<String> getExtensions()
-    {
-        return Collections.singletonList( DEFAULT_DEFLATED_FASTQ_EXTENSION );
     }
 
     public void getNextLength() throws IOException

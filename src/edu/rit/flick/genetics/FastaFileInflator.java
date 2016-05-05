@@ -10,8 +10,6 @@ import static org.apache.commons.io.FileUtils.getFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -66,12 +64,6 @@ public class FastaFileInflator extends FastFileInflator implements FastaFileArch
 
         tandemFile = new Scanner( getFile( tempOutputDirectory, TANDEM_REPEAT_FILE ) )
                 .useDelimiter( "\\" + PIPE );
-    }
-
-    @Override
-    public List<String> getExtensions()
-    {
-        return Collections.singletonList( DEFAULT_DEFLATED_FASTA_EXTENSION );
     }
 
     @Override

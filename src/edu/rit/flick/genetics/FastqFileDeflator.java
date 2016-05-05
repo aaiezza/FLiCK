@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import edu.rit.flick.genetics.util.ByteBufferOutputStream;
@@ -61,12 +60,6 @@ public class FastqFileDeflator extends FastFileDeflator implements FastqFileArch
                 DEFAULT_BUFFER );
         commentsfile = new BufferedOutputStream(
                 new FileOutputStream( tempOutputDirectory + COMMENTS_FILE ), DEFAULT_BUFFER );
-    }
-
-    @Override
-    public List<String> getExtensions()
-    {
-        return Collections.singletonList( FASTQ_EXTENSION );
     }
 
     @Override

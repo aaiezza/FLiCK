@@ -6,8 +6,8 @@
  */
 package edu.rit.flick.config;
 
-import edu.rit.flick.genetics.config.FastaInflationOptionSet;
-import edu.rit.flick.genetics.config.FastqInflationOptionSet;
+import static edu.rit.flick.config.DefaultOptionSet.ARCHIVE_MODE;
+import static edu.rit.flick.config.DefaultOptionSet.INFLATION_ARCHIVE_MODE;
 
 /**
  * @author Alex Aiezza
@@ -16,9 +16,12 @@ import edu.rit.flick.genetics.config.FastqInflationOptionSet;
 public class InflationConfiguration extends AbstractConfiguration
 {
     {
+        for ( final InflationOptionSet ios : FileArchiverExtensionRegistry.getInstance()
+                .getInflationOptionSets() )
+            registerOptionSet( ios );
+
         registerOptionSet( new InflationOptionSet() );
 
-        registerOptionSet( new FastaInflationOptionSet() );
-        registerOptionSet( new FastqInflationOptionSet() );
+        setFlag( ARCHIVE_MODE, INFLATION_ARCHIVE_MODE );
     }
 }

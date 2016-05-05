@@ -43,6 +43,7 @@ import com.google.common.io.Files;
 
 import edu.rit.flick.AbstractFlickFile;
 import edu.rit.flick.DefaultFlickFile;
+import edu.rit.flick.config.FileArchiverExtensionRegistry;
 import edu.rit.flick.genetics.FastaFileArchiver;
 import edu.rit.flick.genetics.FastqFileArchiver;
 import it.unimi.dsi.io.ByteBufferInputStream;
@@ -54,26 +55,29 @@ import it.unimi.dsi.io.ByteBufferInputStream;
  */
 public class FlickTest
 {
-    private static final String                VERBOSE_FLAG                    = "--verbose";
+    private static final String                        VERBOSE_FLAG                    = "--verbose";
 
-    private static final String                HELP_FLAG                       = "--help";
+    private static final String                        HELP_FLAG                       = "--help";
 
-    private static final String                FILES_DO_NOT_MATCH_ERROR_FORMAT = "%n  File '%s' is different from%n  file '%s'%n    at byte# %d%n";
+    private static final String                        FILES_DO_NOT_MATCH_ERROR_FORMAT = "%n  File '%s' is different from%n  file '%s'%n    at byte# %d%n";
 
-    private static final String                TEST_RESOURCES_FOLDER           = "test_resources" +
+    private static final String                        TEST_RESOURCES_FOLDER           = "test_resources" +
             File.separator;
 
-    private static final String                RESOURCES_FOLDER                = "resources" +
+    private static final String                        RESOURCES_FOLDER                = "resources" +
             File.separator;
 
-    private static final String                FULL_FASTA_EXTENSION            = ".fasta";
+    private static final String                        FULL_FASTA_EXTENSION            = ".fasta";
 
-    private static final String                FULL_FASTQ_EXTENSION            = ".fastq";
+    private static final String                        FULL_FASTQ_EXTENSION            = ".fastq";
 
-    private static final ByteArrayOutputStream outContent                      = new ByteArrayOutputStream();
-    private static final ByteArrayOutputStream errContent                      = new ByteArrayOutputStream();
+    private static final FileArchiverExtensionRegistry REGISTRY                        = FileArchiverExtensionRegistry
+            .getInstance();
 
-    private static PrintStream                 oldOut, oldErr;
+    private static final ByteArrayOutputStream         outContent                      = new ByteArrayOutputStream();
+    private static final ByteArrayOutputStream         errContent                      = new ByteArrayOutputStream();
+
+    private static PrintStream                         oldOut, oldErr;
 
     @AfterClass
     public static void cleanUpStreams() throws IOException
@@ -258,9 +262,10 @@ public class FlickTest
     private final void testFASTAfile( final String fileBase )
     {
         originalFile = getFile( TEST_RESOURCES_FOLDER,
-            fileBase + FastaFileArchiver.FASTA_EXTENSION );
-        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastaFileArchiver.FASTA_EXTENSION +
-                FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION );
+            fileBase + REGISTRY.getExtensions( FastaFileArchiver.class ).get( 0 ) );
+        flickedFile = getFile( TEST_RESOURCES_FOLDER,
+            fileBase + REGISTRY.getExtensions( FastaFileArchiver.class ).get( 0 ) +
+                    FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION );
         unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTA_EXTENSION );
 
         try
@@ -275,9 +280,10 @@ public class FlickTest
     private final void testFASTQfile( final String fileBase )
     {
         originalFile = getFile( TEST_RESOURCES_FOLDER,
-            fileBase + FastqFileArchiver.FASTQ_EXTENSION );
-        flickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FastqFileArchiver.FASTQ_EXTENSION +
-                FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION );
+            fileBase + REGISTRY.getExtensions( FastqFileArchiver.class ).get( 0 ) );
+        flickedFile = getFile( TEST_RESOURCES_FOLDER,
+            fileBase + REGISTRY.getExtensions( FastqFileArchiver.class ).get( 0 ) +
+                    FastqFileArchiver.DEFAULT_DEFLATED_FASTQ_EXTENSION );
         unflickedFile = getFile( TEST_RESOURCES_FOLDER, fileBase + FULL_FASTQ_EXTENSION );
 
         try

@@ -6,8 +6,6 @@
  */
 package edu.rit.flick;
 
-import java.util.List;
-
 /**
  * @author Alex Aiezza
  *
@@ -15,6 +13,4 @@ import java.util.List;
 public interface FileArchiver
 {
     public String getDefaultDeflatedExtension();
-
-    public List<String> getExtensions();
 }

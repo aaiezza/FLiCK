@@ -6,9 +6,7 @@
  */
 package edu.rit.flick.util;
 
-import static edu.rit.flick.config.DefaultOptionSet.ARCHIVE_MODE;
 import static edu.rit.flick.config.DefaultOptionSet.HELP_FLAG;
-import static edu.rit.flick.config.DefaultOptionSet.INFLATION_ARCHIVE_MODE;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -45,7 +43,6 @@ public class Unflick
     {
         final Configuration configuration = new InflationConfiguration();
         ConfigurationProcessor.processConfiguration( configuration, args );
-        configuration.setFlag( ARCHIVE_MODE, INFLATION_ARCHIVE_MODE );
 
         if ( args.length <= 0 || configuration.getFlag( HELP_FLAG ) )
         {

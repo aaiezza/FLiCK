@@ -8,10 +8,22 @@ package edu.rit.flick.genetics;
 
 import static java.lang.String.format;
 
+import edu.rit.flick.RegisterFileDeflatorInflator;
+import edu.rit.flick.genetics.config.FastaDeflationOptionSet;
+import edu.rit.flick.genetics.config.FastaInflationOptionSet;
+
 /**
  * @author Alex Aiezza
  *
  */
+@RegisterFileDeflatorInflator (
+    deflatedExtension = FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION,
+    inflatedExtensions =
+{ "fna", "fa", "fasta" },
+    fileDeflator = FastaFileDeflator.class,
+    fileInflator = FastaFileInflator.class,
+    fileDeflatorOptionSet = FastaDeflationOptionSet.class,
+    fileInflatorOptionSet = FastaInflationOptionSet.class )
 public interface FastaFileArchiver extends FastFileArchiver
 {
     public final static int    DEFAULT_FASTA_SEQUENCE_LINE_SIZE       = 80;
@@ -24,8 +36,6 @@ public interface FastaFileArchiver extends FastFileArchiver
         META_FASTA_SEQUENCE_LINE_LENGTH );
 
     public static final byte   SEQUENCE_ID_START                      = '>';
-
-    public static final String FASTA_EXTENSION                        = ".fna";
 
     public static final String DEFAULT_DEFLATED_FASTA_EXTENSION       = ".flickfa";
 

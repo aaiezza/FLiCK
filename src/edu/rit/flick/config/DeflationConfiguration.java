@@ -6,8 +6,8 @@
  */
 package edu.rit.flick.config;
 
-import edu.rit.flick.genetics.config.FastaDeflationOptionSet;
-import edu.rit.flick.genetics.config.FastqDeflationOptionSet;
+import static edu.rit.flick.config.DefaultOptionSet.ARCHIVE_MODE;
+import static edu.rit.flick.config.DefaultOptionSet.DEFLATION_ARCHIVE_MODE;
 
 /**
  * @author Alex Aiezza
@@ -16,10 +16,13 @@ import edu.rit.flick.genetics.config.FastqDeflationOptionSet;
 public class DeflationConfiguration extends AbstractConfiguration
 {
     {
+        for ( final DeflationOptionSet dos : FileArchiverExtensionRegistry.getInstance()
+                .getDeflationOptionSets() )
+            registerOptionSet( dos );
+
         registerOptionSet( new DeflationOptionSet() );
 
-        registerOptionSet( new FastaDeflationOptionSet() );
-        registerOptionSet( new FastqDeflationOptionSet() );
+        setFlag( ARCHIVE_MODE, DEFLATION_ARCHIVE_MODE );
     }
 
 }

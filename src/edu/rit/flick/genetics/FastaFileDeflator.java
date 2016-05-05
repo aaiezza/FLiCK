@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import edu.rit.flick.genetics.util.ByteBufferOutputStream;
@@ -114,12 +113,6 @@ public class FastaFileDeflator extends FastFileDeflator implements FastaFileArch
             (long) ( fastaFile.length() / ( EXPECTED_COMPRESSION_RATIO * 2 ) ) );
     }
 
-
-    @Override
-    public List<String> getExtensions()
-    {
-        return Collections.singletonList( FASTA_EXTENSION );
-    }
 
     @Override
     public int getFastaSequenceLineSize()

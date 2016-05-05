@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.common.io.Files;
 
 import edu.rit.flick.config.Configuration;
+import edu.rit.flick.config.FileArchiverExtensionRegistry;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
@@ -31,19 +32,22 @@ import net.lingala.zip4j.util.Zip4jConstants;
  */
 public abstract class AbstractFlickFile implements FlickFile
 {
-    public static final String    FILE_NOT_FOUND_EXCEPTION_MESSAGE               = "file not found";
+    public static final String                    FILE_NOT_FOUND_EXCEPTION_MESSAGE               = "file not found";
 
-    private static final String   FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION     = "already exists as directory";
+    private static final String                   FILE_ALREADY_EXISTS_AS_DIRECTORY_EXCEPTION     = "already exists as directory";
 
-    private static final String   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "\n  can't overwrite existing file without --force flag";
+    private static final String                   CANT_OVERWRITE_EXISTING_FILE_WITHOT_FORCE_FLAG = "\n  can't overwrite existing file without --force flag";
 
-    protected final File          fileIn, fileOut;
+    protected final File                          fileIn, fileOut;
 
-    protected final Configuration configuration;
+    protected final Configuration                 configuration;
 
-    protected final ZipFile       flickFile;
+    protected final ZipFile                       flickFile;
 
-    protected final ZipParameters zParams;
+    protected final ZipParameters                 zParams;
+
+    protected final FileArchiverExtensionRegistry REGISTRY                                       = FileArchiverExtensionRegistry
+            .getInstance();
 
     public AbstractFlickFile( final Configuration configuration )
         throws ZipException,
@@ -51,8 +55,6 @@ public abstract class AbstractFlickFile implements FlickFile
         NoSuchFileException
     {
         this.configuration = configuration;
-
-        init();
 
         final String inputPath = (String) configuration.getOption( INPUT_PATH );
         final Object outputPath = configuration.getOption( OUTPUT_PATH );
@@ -120,7 +122,4 @@ public abstract class AbstractFlickFile implements FlickFile
     {
         return fileOut.getPath();
     }
-
-    protected void init()
-    {}
 }
