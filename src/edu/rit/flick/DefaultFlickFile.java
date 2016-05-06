@@ -17,8 +17,6 @@ import static edu.rit.flick.config.InflationOptionSet.KEEP_ZIPPED_FLAG;
 
 import java.io.File;
 import java.io.RandomAccessFile;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +29,6 @@ import com.google.common.io.Files;
 
 import edu.rit.flick.config.Configuration;
 import net.lingala.zip4j.core.HeaderReader;
-import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.CentralDirectory;
 import net.lingala.zip4j.model.FileHeader;
 import net.lingala.zip4j.model.ZipModel;
@@ -57,14 +54,9 @@ public class DefaultFlickFile extends AbstractFlickFile
 
     /**
      * @param configuration
-     * @throws ZipException
-     * @throws FileAlreadyExistsException
-     * @throws NoSuchFileException
+     * @throws Exception
      */
-    public DefaultFlickFile( final Configuration configuration )
-        throws ZipException,
-        FileAlreadyExistsException,
-        NoSuchFileException
+    public DefaultFlickFile( final Configuration configuration ) throws Exception
     {
         super( configuration );
     }

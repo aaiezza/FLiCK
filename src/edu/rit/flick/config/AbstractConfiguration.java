@@ -102,4 +102,39 @@ public abstract class AbstractConfiguration implements Configuration
     {
         options.put( option, value );
     }
+
+    @Override
+    public Map<Flag, Boolean> getFlags()
+    {
+        return flags;
+    }
+
+    @Override
+    public Map<Option<?>, Object> getOptions()
+    {
+        return options;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return getOptions().hashCode() + getFlags().hashCode();
+    }
+
+    @Override
+    public boolean equals( final Object obj )
+    {
+        if ( obj instanceof Configuration )
+        {
+            return this.getOptions().equals( ( (Configuration) obj ).getOptions() ) &&
+                    this.getFlags().equals( ( (Configuration) obj ).getFlags() );
+        }
+        return false;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "%s\n%s", getOptions(), getFlags() );
+    }
 }

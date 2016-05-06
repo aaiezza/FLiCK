@@ -31,4 +31,7 @@ public interface FileInflator extends FileArchiver
     {
         return inflate( configuration, new File( fileIn ), new File( fileOut ) );
     }
+
+    public default void inflationVerification() throws Exception
+    {}
 }

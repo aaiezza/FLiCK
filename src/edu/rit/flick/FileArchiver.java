@@ -13,4 +13,7 @@ package edu.rit.flick;
 public interface FileArchiver
 {
     public String getDefaultDeflatedExtension();
+
+    public default void deflationInflationVerification() throws Exception
+    {}
 }

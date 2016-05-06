@@ -6,6 +6,8 @@
  */
 package edu.rit.flick.config;
 
+import java.util.Map;
+
 /**
  * @author Alex Aiezza
  *
@@ -14,19 +16,23 @@ public interface Configuration
 {
     public void addFlag( final Flag flag );
 
-    public void addOption( final Option<? extends Object> option );
+    public void addOption( final Option<?> option );
 
     public boolean getFlag( final Flag flag );
 
-    public Object getOption( final Option<? extends Object> option );
+    public Map<Flag, Boolean> getFlags();
 
-    public Option<? extends Object> getOptionFromLongFormat( final String option );
+    public Object getOption( final Option<?> option );
 
-    public Option<? extends Object> getOptionFromShortFormat( final String optionStr );
+    public Map<Option<?>, Object> getOptions();
 
-    public void registerOptionSet( final OptionSet<? extends Object> optionSet );
+    public Option<?> getOptionFromLongFormat( final String option );
+
+    public Option<?> getOptionFromShortFormat( final String optionStr );
+
+    public void registerOptionSet( final OptionSet<?> optionSet );
 
     public void setFlag( final Flag flag, final boolean value );
 
-    public void setOption( final Option<? extends Object> op, final Object object );
+    public void setOption( final Option<?> op, final Object object );
 }

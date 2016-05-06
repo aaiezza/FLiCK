@@ -31,4 +31,7 @@ public interface FileDeflator extends FileArchiver
     {
         return deflate( configuration, new File( fileIn ), new File( fileOut ) );
     }
+
+    public default void deflationVerification() throws Exception
+    {}
 }
