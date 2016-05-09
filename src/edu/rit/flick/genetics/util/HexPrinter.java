@@ -6,7 +6,7 @@
  */
 package edu.rit.flick.genetics.util;
 
-import static java.lang.Integer.toHexString;
+import static org.apache.commons.lang.StringUtils.leftPad;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,22 +21,28 @@ public class HexPrinter
 
     public static void shortToFile( final short s, final OutputStream out ) throws IOException
     {
-        final byte w1 = (byte) ( s >> 8 );
-        final byte w2 = (byte) ( s & 0b1111_1111 );
-        out.write( new byte [] { w1, w2 } );
+        out.write( new byte [] { (byte) ( s >> 8 ), (byte) ( s & 0b1111_1111 ) } );
     }
 
     public static String shortToHexString( final short s )
     {
-        final StringBuilder hex = new StringBuilder();
-        final int w1 = s >> 8;
-        final int w2 = s & 0b1111_1111;
-        String num = toHexString( w1 );
-        hex.append( ( "00" + num ).substring( num.length() ) );
-        num = Integer.toHexString( w2 );
-        hex.append( ( "00" + num ).substring( num.length() ) );
+        return leftPad( Integer.toHexString( s ), 4, '0' );
+    }
 
-        return hex.toString();
+    public static String shortToBinaryString( final short s )
+    {
+        return intToBinaryString( Short.toUnsignedInt( s ) );
+    }
+
+    public static String intToBinaryString( final int i )
+    {
+        final StringBuilder str = new StringBuilder( org.apache.commons.lang.StringUtils
+                .leftPad( Integer.toBinaryString( i ), 16, '0' ) );
+
+        for ( int idx = str.length() - 4; idx > 0; idx -= 4 )
+            str.insert( idx, "_" );
+
+        return str.toString();
     }
 
     private HexPrinter()
