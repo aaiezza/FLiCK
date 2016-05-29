@@ -9,6 +9,7 @@ package edu.rit.flick.config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * @author Alex Aiezza
@@ -16,7 +17,7 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractConfiguration implements Configuration
 {
-    private final Map<Option<? extends Object>, Object> options;
+    private final Map<Option<?>, Object> options;
 
     private final Map<Flag, Boolean>                    flags;
 
@@ -25,7 +26,6 @@ public abstract class AbstractConfiguration implements Configuration
         flags = new HashMap<Flag, Boolean>();
     }
 
-    @SuppressWarnings ( "unchecked" )
     public AbstractConfiguration()
     {
         registerOptionSet( new DefaultOptionSet() );
@@ -38,7 +38,7 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     @Override
-    public void addOption( final Option<? extends Object> option )
+    public void addOption( final Option<?> option )
     {
         options.put( option, option.getDefaultValue() );
     }
@@ -50,42 +50,34 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     @Override
-    public Object getOption( final Option<? extends Object> option )
+    public Object getOption( final Option<?> option )
     {
         return options.get( option );
     }
 
     @Override
-    public Option<? extends Object> getOptionFromLongFormat( final String optionStr )
+    public Option<?> getOptionFromLongFormat( final String optionStr )
     {
-        return getOptionFromString( optionStr, e -> e.getLongFlag().matches( optionStr ) );
+        return getOptionFromString( e -> e.getLongFlag().matches( optionStr ) );
     }
 
     @Override
-    public Option<? extends Object> getOptionFromShortFormat( final String optionStr )
+    public Option<?> getOptionFromShortFormat( final String optionStr )
     {
-        return getOptionFromString( optionStr, e -> e.getShortFlag().matches( optionStr ) );
+        return getOptionFromString( e -> e.getShortFlag().matches( optionStr ) );
     }
 
-    private Option<? extends Object> getOptionFromString(
-            final String optionStr,
-            final Predicate<Option<? extends Object>> predicate )
+    private Option<?> getOptionFromString(
+            final Predicate<Option<?>> predicate )
     {
-        for ( final Option<? extends Object> op : options.keySet() )
-            if ( predicate.test( op ) )
-                return op;
-
-        for ( final Option<? extends Object> op : flags.keySet() )
-            if ( predicate.test( op ) )
-                return op;
-
-        return null;
+        return Stream.concat( options.keySet().stream(), flags.keySet().stream() )
+                .filter( predicate ).findFirst().get();
     }
 
     @Override
-    public void registerOptionSet( final OptionSet<? extends Object> optionSet )
+    public void registerOptionSet( final OptionSet<?> optionSet )
     {
-        for ( final Option<? extends Object> option : optionSet.getOptions() )
+        for ( final Option<?> option : optionSet.getOptions() )
             if ( option.isFlag() )
                 addFlag( (Flag) option );
             else addOption( option );
@@ -98,7 +90,7 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     @Override
-    public void setOption( final Option<? extends Object> option, final Object value )
+    public void setOption( final Option<?> option, final Object value )
     {
         options.put( option, value );
     }

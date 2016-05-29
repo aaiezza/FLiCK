@@ -16,7 +16,7 @@ import edu.rit.flick.config.Flag;
  */
 public class FastqDeflationOptionSet extends DeflationOptionSet
 {
-    public static final Flag NO_ZIP_FQ = new DefaultFlag( "no zip fq", "no-zip-fa", "", false );
+    public static final Flag NO_ZIP_FQ = new DefaultFlag( "no zip fq", "no-zip-fq", "", false );
 
     {
         options.add( NO_ZIP_FQ );
