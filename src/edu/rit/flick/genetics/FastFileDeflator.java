@@ -248,7 +248,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
 
         zParams.setIncludeRootFolder( false );
         zParams.setCompressionMethod( Zip4jConstants.COMP_DEFLATE );
-        zParams.setCompressionLevel( Zip4jConstants.DEFLATE_LEVEL_FASTEST );
+        zParams.setCompressionLevel( Zip4jConstants.DEFLATE_LEVEL_NORMAL );
 
         flickFile.createZipFileFromFolder( tmpOutputDirectory, zParams, false, 0 );
 
@@ -288,12 +288,28 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
         return isRNAData;
     }
 
+    protected boolean processConventionalNucleotide() throws IOException
+    {
+        hyperCompressionBytes[compressionCounter] = dnaByte;
+        if ( compressionCounter == 3 )
+        {
+            final String tetramer = new String( hyperCompressionBytes );
+
+            if ( !getByteConverter().containsKey( tetramer ) )
+                throw new TetramerNotFoundException( tetramer );
+            else datahcf.put( getByteConverter().get( tetramer ).byteValue() );
+
+            compressionCounter = 0;
+        } else compressionCounter++;
+        return true;
+    }
+
     protected void processLineType()
     {}
 
     protected void processNucleotides() throws IOException
     {
-        while ( fastIn.available() > 0 && ( dnaByte = (byte) fastIn.read() ) != -1 )
+        getNucleotide: while ( fastIn.available() > 0 && ( dnaByte = (byte) fastIn.read() ) != -1 )
         {
             beforeProcessNucleotide();
 
@@ -332,20 +348,8 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                     writingToNFile = false;
                 }
 
-                // TODO Maybe pass out this functionality
-                 // **********
-                hyperCompressionBytes[compressionCounter] = dnaByte;
-                if ( compressionCounter == 3 )
-                {
-                    final String tetramer = new String( hyperCompressionBytes );
-
-                    if ( !getByteConverter().containsKey( tetramer ) )
-                        throw new TetramerNotFoundException( tetramer );
-                    else datahcf.put( getByteConverter().get( tetramer ).byteValue() );
-
-                    compressionCounter = 0;
-                } else compressionCounter++;
-                // *************
+                if ( !processConventionalNucleotide() )
+                    break getNucleotide;
 
                 dnaPosition.increment();
                 continue;

@@ -8,10 +8,6 @@ package edu.rit.flick.genetics;
 
 import static java.lang.String.format;
 
-import edu.rit.flick.RegisterFileDeflatorInflator;
-import edu.rit.flick.genetics.config.FastaDeflationOptionSet;
-import edu.rit.flick.genetics.config.FastaInflationOptionSet;
-
 /**
  * @author Alex Aiezza
  *

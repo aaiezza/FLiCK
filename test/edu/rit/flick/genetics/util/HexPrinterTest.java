@@ -22,6 +22,19 @@ public class HexPrinterTest
 
     private final File       testFile                 = new File( "test_resources/testShorts.txt" );
 
+    private Stream<Short> randomShorts()
+    {
+        return Stream.iterate( (short) 10, ( seed ) -> (short) ( Math.random() * Short.MAX_VALUE ) )
+                .limit( NUMBER_OF_SHORTS_TO_TEST );
+    }
+
+    @Test
+    public void testSomeShorts()
+    {
+        randomShorts().forEach(
+            s -> assertEquals( Integer.parseInt( shortToHexString( s ), 16 ), (short) s ) );
+    }
+
     @Test
     public void testSomeShortsToFile()
     {
@@ -36,7 +49,7 @@ public class HexPrinterTest
         try ( final FileOutputStream fw = new FileOutputStream( testFile ) )
         {
             for ( final short s : shawties )
-                shortToFile( (short) s, fw );
+                shortToFile( s, fw );
         } catch ( final IOException e )
         {
             fail( e.getMessage() );
@@ -59,18 +72,5 @@ public class HexPrinterTest
         {
             cleanUp.run();
         }
-    }
-
-    @Test
-    public void testSomeShorts()
-    {
-        randomShorts().forEach(
-            s -> assertEquals( Integer.parseInt( shortToHexString( s ), 16 ), (short) s ) );
-    }
-
-    private Stream<Short> randomShorts()
-    {
-        return Stream.iterate( (short) 10, ( seed ) -> (short) ( Math.random() * Short.MAX_VALUE ) )
-                .limit( NUMBER_OF_SHORTS_TO_TEST );
     }
 }

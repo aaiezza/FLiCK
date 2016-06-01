@@ -13,7 +13,7 @@ import edu.rit.flick.genetics.config.FastaDeflationOptionSet;
 public class KmerFastaDeflationOptionSet extends FastaDeflationOptionSet
 {
     public static final IntegerOption KMER_SIZE = new IntegerOption( "kmer size", "kmer-size", "k",
-            7 );
+            31 );
 
     {
         options.add( KMER_SIZE );

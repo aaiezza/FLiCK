@@ -1,13 +1,28 @@
 package edu.rit.flick.genetics.nucleotide.kmer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.ConnectivityInspector;
+import org.jgrapht.event.GraphVertexChangeEvent;
+import org.jgrapht.graph.ListenableDirectedGraph;
+
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.Funnels;
+
+import edu.rit.flick.genetics.nucleotide.Nucleotide;
 
 /**
  * @author Alex Aiezza
@@ -15,54 +30,96 @@ import java.util.stream.Stream;
  */
 public class KmerDeBruijnGraph
 {
-    private Map<Kmer, LongAdder> kmers;
+    private Map<Kmer, LongAdder>                  kmers;
 
-    private Set<Kmer>            graph;
-    private Kmer                 anchor;
+    // TODO Consider making this a list, since edges are no long computed and
+    // added
+    private DirectedGraph<Kmer, KmerEdge>         kmerGraph;
+    private ConnectivityInspector<Kmer, KmerEdge> kmerGraphInspector;
+
+    private Kmer                                  anchor;
+
+    private BloomFilter<CharSequence>             kmerBloom;
+    private Funnel<CharSequence>                  kmerFunnel;
 
     // I've had enough kmers! It is time to build a graph!
-    private boolean              hadEnough = false;
+    private boolean                               hadEnough = false;
 
-    private final LongAdder      sum       = new LongAdder();
+    private final LongAdder                       sum       = new LongAdder();
 
-    // Some sort of optimization for maintaining the size of the kmer counter.
-    // TODO Might want to actual NOT read through whole file on first run, but
-    // rather do it the second time around considering that optimization here
-    // may lead to fewer reads needing to be taken in initially.
-    //
-    private long                 Tsol      = 3;
+    private int                                   kmerSize;
 
-    public KmerDeBruijnGraph()
+    private long                                  sampleSize;
+
+    public KmerDeBruijnGraph( final int kmerSize )
     {
-        super();
-        this.kmers = Collections.synchronizedMap( new HashMap<Kmer, LongAdder>() );
-        this.graph = Collections.synchronizedSet( new HashSet<Kmer>() );
+        this.kmerSize = kmerSize;
+        kmers = Collections.synchronizedMap( new HashMap<Kmer, LongAdder>() );
+        sampleSize = (long) Math.pow( 4, kmerSize - 1 );
+
+        kmerFunnel = Funnels.stringFunnel( Charset.defaultCharset() );
+
+        final ListenableDirectedGraph<Kmer, KmerEdge> kmerGraph = new ListenableDirectedGraph<Kmer, KmerEdge>(
+                KmerEdge.class )
+        {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean containsVertex( final Kmer kmer )
+            {
+                if ( kmerBloom.mightContain( kmer.getKmer() ) )
+                    return super.containsVertex( kmer );
+                return false;
+            }
+
+        };
+        this.kmerGraph = kmerGraph;
+
+        kmerGraphInspector = new ConnectivityInspector<Kmer, KmerEdge>( this.kmerGraph )
+        {
+            // Just look up successors with the generated prefixes!
+            @Override
+            public void vertexAdded( final GraphVertexChangeEvent<Kmer> e )
+            {
+                final Kmer newKmer = e.getVertex();
+                kmerBloom.put( newKmer.getKmer() );
+                super.vertexAdded( e );
+            }
+        };
+        kmerGraph.addGraphListener( kmerGraphInspector );
     }
 
     private void buildKmerLibrary()
     {
-        Tsol = Long.min( (long) ( 0.05 * sum.longValue() ), (long) kmers.values().parallelStream()
-                .mapToLong( kc -> kc.longValue() ).average().getAsDouble() );
-        final int kmerLimit = (int) ( kmers.size() * 0.25 );
-        graph = Collections.unmodifiableSet( Stream
-                .concat( Stream.of( anchor ),
-                    kmers.entrySet().stream().filter( e -> e.getValue().longValue() >= Tsol )
-                            .limit( kmerLimit ).map( e -> e.getKey() ) )
-                .collect( Collectors.toSet() ) );
+        // TODO Switch is for debugging
+        switch ( "average" )
+        {
+        case "minOf3":
+            buildKmerLibrary( Long.max( (long) ( 1e-6 * sum.longValue() ), 3 ),
+                (int) ( kmers.size() * 0.25 ) );
+            break;
+        case "average":
+            buildKmerLibrary(
+                Long.max( 3, (long) kmers.values().parallelStream()
+                        .mapToLong( kc -> kc.longValue() ).average().getAsDouble() ),
+                (int) ( kmers.size() * 0.25 ) );
+            break;
+        }
+    }
 
-        System.out.printf( "Average #ofKmers: %f\n", kmers.values().parallelStream()
-                .mapToLong( kc -> kc.longValue() ).average().getAsDouble() );
-        final long maxKmer = kmers.values().parallelStream().mapToLong( kc -> kc.longValue() ).max()
-                .getAsLong();
-        System.out
-                .printf( "Max occurring Kmer: %s - %d\n",
-                    kmers.entrySet().stream().filter( e -> e.getValue().longValue() == maxKmer )
-                            .map( e -> e.getKey().getKmer() ).collect( Collectors.toSet() ),
-                    maxKmer );
-        System.out.printf( "# of total kmers: %d\n", kmers.size() );
-        System.out.printf( "# of kmers that made it into the graph: %d\n", graph.size() );
-        // TODO there might be unconnected children in here! Heads up!
+    private void buildKmerLibrary( final long Tsol, final int kmerLimit )
+    {
+        kmerBloom = BloomFilter.create( kmerFunnel, kmerLimit, 1e-30 );
 
+        kmers.entrySet().stream()
+                .sorted( ( e1, e2 ) -> e1.getValue().intValue() - e2.getValue().intValue() )
+                .filter( e -> e.getValue().longValue() > Tsol ).limit( kmerLimit )
+                .map( e -> e.getKey() ).forEach( kmerGraph::addVertex );
+
+        // Make sure we have the anchor
+        kmerGraph.addVertex( anchor );
+
+        printStats( Tsol, kmerLimit );
         // Don't need you anymore!
         kmers = null;
     }
@@ -71,7 +128,7 @@ public class KmerDeBruijnGraph
      * Add kmer to list of counted kmers. If it already has been counted before,
      * the count is incremented. If it has not, the given kmer is added to the
      * map of kmers with a count of 1.
-     * 
+     *
      * @param kmer
      * @return
      */
@@ -83,41 +140,78 @@ public class KmerDeBruijnGraph
             kmers.computeIfAbsent( kmer, k -> new LongAdder() ).increment();
             sum.increment();
 
-            kmers.keySet().parallelStream().forEach( pkmer -> {
-                if ( kmer.prefix().equals( pkmer.suffix() ) )
-                    pkmer.addChild( kmer );
-                else if ( kmer.suffix().equals( pkmer.prefix() ) )
-                    kmer.addChild( pkmer );
-            } );
-
             if ( sum.longValue() == 1 )
-                // Gaurunteed beginning anchor!
+                // We just always want the first one in in our graph
                 anchor = kmer;
 
-            // TODO based on some optimization, check to see if more kmers are
-            // necessary.
-            // Right now, this is just a flat size restriction
-            if ( kmers.size() >= Integer.MAX_VALUE / 128 )
+            if ( sum.longValue() >= sampleSize )
                 startOptimization();
         }
 
         return hadEnough();
     }
 
-    public long kmerCount( final Kmer kmer )
+    public void forceAddKmer( final String kmerStr )
     {
-        return kmers.get( kmer ).longValue();
+        if ( kmerStr.length() != kmerSize - 1 )
+            throw new IllegalArgumentException(
+                    String.format( "Can't accept kmer that is not size %d", kmerSize - 1 ) );
+
+        kmerGraph.addVertex( new Kmer( kmerStr ) );
     }
 
-    public long kmerCount( final String kmer )
+    public void freeChildren( final Kmer baronKmer )
     {
-        return kmerCount( new Kmer( kmer ) );
+        final int i = 2;
+        // for ( int i = 0; i < baronKmer.size() - 1; i++ )
+        // {
+        final String suffix = baronKmer.suffix().substring( i );
+        final Optional<Kmer> descendent = kmerGraph.vertexSet().parallelStream()
+                .filter( pk -> pk.getKmer().startsWith( suffix ) ).findAny();
+
+        if ( !descendent.isPresent() )
+            // continue;
+            return;
+
+        Kmer parent = null;
+        Kmer baby = descendent.get();
+        for ( int m = 0; m <= i; m++ )
+        {
+            parent = new Kmer( baronKmer.getKmer().substring( i - m ) +
+                    baby.getKmer().substring( baby.size() - i + m - 1, baby.size() - 1 ) );
+            kmerGraph.addVertex( baby );
+            baby = parent;
+        }
+        kmerGraph.addVertex( baby );
+        // break;
+        // }
+    }
+
+    /**
+     * @return the anchor
+     */
+    public Kmer getAnchor()
+    {
+        return anchor;
+    }
+
+    public long getBaronNodes()
+    {
+        return kmerGraph.vertexSet().parallelStream().filter( k -> getSuccessors( k ).isEmpty() )
+                .count();
     }
 
     public Kmer getKmer( final Kmer kmer )
     {
-        // TODO Do I return something special if an asked-for kmer is not found.
-        return graph.stream().filter( kmer::equals ).findFirst().orElse( null );
+        if ( kmerGraph.containsVertex( kmer ) )
+            return kmerGraph.vertexSet().parallelStream().filter( kmer::equals ).findFirst()
+                    .orElse( null );
+        else return null;
+    }
+
+    public Kmer getKmer( final String kmer )
+    {
+        return getKmer( new Kmer( kmer ) );
     }
 
     public long getKmersCounted()
@@ -125,9 +219,23 @@ public class KmerDeBruijnGraph
         return sum.longValue();
     }
 
-    public Kmer getKmer( final String kmer )
+    public long getKmerTerminalNodes()
     {
-        return getKmer( new Kmer( kmer.substring( 0, kmer.length() - 1 ) ) );
+        return kmers.keySet().parallelStream().filter( k -> kmers.keySet().parallelStream()
+                .filter( k2 -> k.suffix().equals( k2.prefix() ) ).count() > 0 ).count();
+    }
+
+    public Set<Kmer> getSuccessors( final Kmer kmer )
+    {
+        return Stream.of( Nucleotide.A, Nucleotide.C, Nucleotide.G, Nucleotide.T )
+                .map( n -> new Kmer( kmer.suffix() + (char) n.byteValue() ) )
+                .filter( kmerGraph::containsVertex ).collect( Collectors.toSet() );
+    }
+
+    public long getTerminalNodes()
+    {
+        return kmerGraph.vertexSet().parallelStream().filter( k -> kmerGraph.outDegreeOf( k ) < 0 )
+                .count();
     }
 
     /**
@@ -138,12 +246,57 @@ public class KmerDeBruijnGraph
      * returned from this same method from the
      * {@link KmerDeBruijnGraph#countKmer(String) countKmer(kmer)} method to
      * know when to begin actual decompression.
-     * 
+     *
      * @return
      */
     public boolean hadEnough()
     {
         return hadEnough;
+    }
+
+    public boolean hasKmer( final Kmer kmer )
+
+    {
+        return kmerBloom.mightContain( kmer.getKmer() );
+    }
+
+    public Set<Kmer> possibleSuccessors( final Kmer kmer )
+    {
+        return Stream.of( Nucleotide.A, Nucleotide.C, Nucleotide.G, Nucleotide.T ).map( n -> {
+            return new Kmer( kmer.suffix() + (char) n.byteValue() );
+        } ).filter( k -> {
+            return kmerBloom.mightContain( k.getKmer() );
+        } ).collect( Collectors.toSet() );
+    }
+
+    private void printStats( final long Tsol, final int kmerLimit )
+    {
+        System.out.printf( "Average Kmer Frequency: %f\n", kmers.values().parallelStream()
+                .mapToLong( kc -> kc.longValue() ).average().getAsDouble() );
+        final long maxKmer = kmers.values().parallelStream().mapToLong( kc -> kc.longValue() ).max()
+                .getAsLong();
+        final Set<String> highestFreqKmers = kmers.entrySet().stream()
+                .filter( e -> e.getValue().longValue() == maxKmer ).map( e -> e.getKey().getKmer() )
+                .collect( Collectors.toSet() );
+        System.out.printf( "Highest Kmer Frequency: %d - %s\n  %d - %.2f%%\n", maxKmer,
+            highestFreqKmers, highestFreqKmers.size(),
+            highestFreqKmers.size() / (float) kmers.size() * 100 );
+        System.out.printf( "# of total kmers: %d\n", kmers.size() );
+        System.out.printf( "# of kmers that made it into the graph: %d\n",
+            kmerGraph.vertexSet().size() );
+        System.out.printf( " Tsol: %d\n Kmer limit: %d\n\n", Tsol, kmerLimit );
+    }
+
+    public void readFrom( final InputStream bloomfile ) throws IOException
+    {
+        kmerBloom = BloomFilter.readFrom( bloomfile, kmerFunnel );
+    }
+
+    public void setAnchor( final String anchorStr )
+    {
+        anchor = new Kmer( anchorStr.substring( 0, anchorStr.length() - 1 ) );
+        kmerBloom.put( anchor.getKmer() );
+        kmerGraph.addVertex( anchor );
     }
 
     /**
@@ -161,8 +314,18 @@ public class KmerDeBruijnGraph
     @Override
     public String toString()
     {
-        // TODO Serialization of this graph!
-        // return graph.toString();
-        return "Nice graph bro!";
+        final StringBuilder out = new StringBuilder();
+        if ( kmerGraph != null )
+            out.append( String.format( "Graph Size: %d (Baron: %d, Terminal: %d) | ",
+                kmerGraph.vertexSet().size(), getBaronNodes(), getTerminalNodes() ) );
+        if ( kmers != null )
+            out.append( String.format( "Kmer Counter Size: %d ~ ", kmers.size() ) );
+        out.append( String.format( "Counted Kmers: %d", sum.longValue() ) );
+        return out.toString();
+    }
+
+    public void writeTo( final OutputStream bloomfile ) throws IOException
+    {
+        kmerBloom.writeTo( bloomfile );
     }
 }

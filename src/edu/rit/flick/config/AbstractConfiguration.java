@@ -44,9 +44,24 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     @Override
+    public boolean equals( final Object obj )
+    {
+        if ( obj instanceof Configuration )
+            return this.getOptions().equals( ( (Configuration) obj ).getOptions() ) &&
+                    this.getFlags().equals( ( (Configuration) obj ).getFlags() );
+        return false;
+    }
+
+    @Override
     public boolean getFlag( final Flag flag )
     {
         return flags.get( flag );
+    }
+
+    @Override
+    public Map<Flag, Boolean> getFlags()
+    {
+        return flags;
     }
 
     @SuppressWarnings ( "unchecked" )
@@ -76,6 +91,24 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     @Override
+    public Map<Option<?>, Object> getOptions()
+    {
+        return options;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return getOptions().hashCode() + getFlags().hashCode();
+    }
+
+    @Override
+    public boolean optionIsNull( final Option<?> option )
+    {
+        return getOption( option ) == null;
+    }
+
+    @Override
     public void registerOptionSet( final OptionSet optionSet )
     {
         for ( final Option<?> option : optionSet.getOptions() )
@@ -94,35 +127,6 @@ public abstract class AbstractConfiguration implements Configuration
     public void setOption( final Option<?> option, final Object value )
     {
         options.put( option, value );
-    }
-
-    @Override
-    public Map<Flag, Boolean> getFlags()
-    {
-        return flags;
-    }
-
-    @Override
-    public Map<Option<?>, Object> getOptions()
-    {
-        return options;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return getOptions().hashCode() + getFlags().hashCode();
-    }
-
-    @Override
-    public boolean equals( final Object obj )
-    {
-        if ( obj instanceof Configuration )
-        {
-            return this.getOptions().equals( ( (Configuration) obj ).getOptions() ) &&
-                    this.getFlags().equals( ( (Configuration) obj ).getFlags() );
-        }
-        return false;
     }
 
     @Override

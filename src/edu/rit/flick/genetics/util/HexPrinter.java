@@ -19,21 +19,6 @@ public class HexPrinter
 {
     public static final int RADIX = Short.SIZE;
 
-    public static void shortToFile( final short s, final OutputStream out ) throws IOException
-    {
-        out.write( new byte [] { (byte) ( s >> 8 ), (byte) ( s & 0b1111_1111 ) } );
-    }
-
-    public static String shortToHexString( final short s )
-    {
-        return leftPad( Integer.toHexString( s ), 4, '0' );
-    }
-
-    public static String shortToBinaryString( final short s )
-    {
-        return intToBinaryString( Short.toUnsignedInt( s ) );
-    }
-
     public static String intToBinaryString( final int i )
     {
         final StringBuilder str = new StringBuilder( org.apache.commons.lang.StringUtils
@@ -43,6 +28,21 @@ public class HexPrinter
             str.insert( idx, "_" );
 
         return str.toString();
+    }
+
+    public static String shortToBinaryString( final short s )
+    {
+        return intToBinaryString( Short.toUnsignedInt( s ) );
+    }
+
+    public static void shortToFile( final short s, final OutputStream out ) throws IOException
+    {
+        out.write( new byte [] { (byte) ( s >> 8 ), (byte) ( s & 0b1111_1111 ) } );
+    }
+
+    public static String shortToHexString( final short s )
+    {
+        return leftPad( Integer.toHexString( s ), 4, '0' );
     }
 
     private HexPrinter()

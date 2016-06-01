@@ -20,15 +20,15 @@ import edu.rit.flick.config.InflationOptionSet;
 @Retention ( RetentionPolicy.RUNTIME )
 public @interface RegisterFileDeflatorInflator
 {
-    String [] inflatedExtensions();
-
     String deflatedExtension() default "flick";
 
     Class<? extends FileDeflator> fileDeflator() default FlickFile.class;
 
-    Class<? extends FileInflator> fileInflator() default FlickFile.class;
-
     Class<? extends DeflationOptionSet> fileDeflatorOptionSet();
 
+    Class<? extends FileInflator> fileInflator() default FlickFile.class;
+
     Class<? extends InflationOptionSet> fileInflatorOptionSet();
+
+    String [] inflatedExtensions();
 }

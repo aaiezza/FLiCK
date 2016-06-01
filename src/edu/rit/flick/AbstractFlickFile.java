@@ -56,7 +56,7 @@ public abstract class AbstractFlickFile implements FlickFile
     {
         this.configuration = configuration;
 
-        final String inputPath = (String) configuration.getOption( INPUT_PATH );
+        final String inputPath = configuration.getOption( INPUT_PATH );
         final Object outputPath = configuration.getOption( OUTPUT_PATH );
 
         // Obtain the would-be input and output files
@@ -122,14 +122,12 @@ public abstract class AbstractFlickFile implements FlickFile
     {
         // Verify the input file is not empty
         if ( !fileIn.isDirectory() )
-        {
             try ( final Scanner sc = new Scanner( fileIn ) )
             {
                 if ( !sc.hasNext() )
                     throw new IOException(
                             String.format( FILE_IS_EMPTY_EXCEPTION_FORMAT, fileIn.getPath() ) );
             }
-        }
 
         // Subclass's deflation verification
         deflationVerification();

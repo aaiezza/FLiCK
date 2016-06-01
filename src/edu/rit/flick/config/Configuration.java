@@ -24,11 +24,13 @@ public interface Configuration
 
     public <V> V getOption( final Option<V> option );
 
-    public Map<Option<?>, Object> getOptions();
-
     public Option<?> getOptionFromLongFormat( final String option );
 
     public Option<?> getOptionFromShortFormat( final String optionStr );
+
+    public Map<Option<?>, Object> getOptions();
+
+    public boolean optionIsNull( final Option<?> option );
 
     public void registerOptionSet( final OptionSet optionSet );
 

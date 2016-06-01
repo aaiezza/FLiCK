@@ -86,9 +86,9 @@ public abstract class FastFileInflator implements FastFileArchiver, FileInflator
     // @formatter:on
     protected final AtomicLong          seqDnaPosition          = new AtomicLong();
 
-    private long                        fastFileSize;
-    private boolean                     containsCarriageReturns = false;
-    private boolean                     isRNAData               = false;
+    protected long                      fastFileSize;
+    protected boolean                   containsCarriageReturns = false;
+    protected boolean                   isRNAData               = false;
 
     protected final BiMap<String, Byte> byteConverter;
 
