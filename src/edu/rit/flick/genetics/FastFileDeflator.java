@@ -248,7 +248,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
 
         zParams.setIncludeRootFolder( false );
         zParams.setCompressionMethod( Zip4jConstants.COMP_DEFLATE );
-        zParams.setCompressionLevel( Zip4jConstants.DEFLATE_LEVEL_FASTEST );
+        zParams.setCompressionLevel( Zip4jConstants.DEFLATE_LEVEL_NORMAL );
 
         flickFile.createZipFileFromFolder( tmpOutputDirectory, zParams, false, 0 );
 

@@ -54,11 +54,17 @@ public abstract class AbstractConfiguration implements Configuration
     {
         return options.get( option );
     }
-
+    
     @Override
     public Option<?> getOptionFromLongFormat( final String optionStr )
     {
         return getOptionFromString( e -> e.getLongFlag().matches( optionStr ) );
+    }
+
+    @Override
+    public boolean optionIsNull( Option<?> option )
+    {
+        return getOption( option ) == null;
     }
 
     @Override

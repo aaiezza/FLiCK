@@ -23,6 +23,8 @@ public interface Configuration
     public Map<Flag, Boolean> getFlags();
 
     public Object getOption( final Option<?> option );
+    
+    public boolean optionIsNull( final Option<?> option );
 
     public Map<Option<?>, Object> getOptions();
 

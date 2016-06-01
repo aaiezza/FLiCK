@@ -77,7 +77,7 @@ public class DefaultFlickFile extends AbstractFlickFile
                 if ( fileDeflator != null )
                 {
                     final long t1 = System.currentTimeMillis();
-                    if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
+                    if ( onlyFile && !configuration.optionIsNull( OUTPUT_PATH ) )
                         archivedFile = fileDeflator.deflate( configuration, file,
                             new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
                     else archivedFile = fileDeflator.deflate( configuration, file );
@@ -90,7 +90,7 @@ public class DefaultFlickFile extends AbstractFlickFile
                 if ( fileInflator != null )
                 {
                     final long t1 = System.currentTimeMillis();
-                    if ( onlyFile && configuration.getOption( OUTPUT_PATH ) != null )
+                    if ( onlyFile && !configuration.optionIsNull( OUTPUT_PATH ) )
                         archivedFile = fileInflator.inflate( configuration, file,
                             new File( (String) configuration.getOption( OUTPUT_PATH ) ) );
                     else archivedFile = fileInflator.inflate( configuration, file );
@@ -151,6 +151,13 @@ public class DefaultFlickFile extends AbstractFlickFile
                 }
 
                 flickFile.addFolder( fileIn, zParams );
+                for ( final File file : compressedFiles )
+                {
+                    String path = file.getPath();
+                    path = path.substring( path.lastIndexOf( fileIn.getName() ),
+                        path.lastIndexOf( "." ) );
+                    flickFile.removeFile( path );
+                }
             } else
             {
                 final File compressedFile = archiveFile( fileIn, true );
@@ -158,14 +165,7 @@ public class DefaultFlickFile extends AbstractFlickFile
                     flickFile.addFile( fileIn, zParams );
                 else compressSingleFile = true;
             }
-
-            for ( final File file : compressedFiles )
-            {
-                String path = file.getPath();
-                path = path.substring( path.lastIndexOf( fileIn.getName() ),
-                    path.lastIndexOf( "." ) );
-                flickFile.removeFile( path );
-            }
+            
 
             if ( configuration.getFlag( DELETE_FLAG ) )
             {
