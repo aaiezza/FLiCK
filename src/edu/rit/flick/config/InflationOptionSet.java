@@ -10,7 +10,7 @@ package edu.rit.flick.config;
  * @author Alex Aiezza
  *
  */
-public class InflationOptionSet extends AbstractOptionSet<Boolean>
+public class InflationOptionSet extends AbstractOptionSet
 {
     public static final Flag KEEP_ZIPPED_FLAG = new DefaultFlag( "keep zipped", "keep-zipped", "",
             false );

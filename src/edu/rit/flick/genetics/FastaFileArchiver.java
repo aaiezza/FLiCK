@@ -16,14 +16,14 @@ import edu.rit.flick.genetics.config.FastaInflationOptionSet;
  * @author Alex Aiezza
  *
  */
-@RegisterFileDeflatorInflator (
-    deflatedExtension = FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION,
-    inflatedExtensions =
-{ "fna", "fa", "fasta" },
-    fileDeflator = FastaFileDeflator.class,
-    fileInflator = FastaFileInflator.class,
-    fileDeflatorOptionSet = FastaDeflationOptionSet.class,
-    fileInflatorOptionSet = FastaInflationOptionSet.class )
+// @RegisterFileDeflatorInflator (
+// deflatedExtension = FastaFileArchiver.DEFAULT_DEFLATED_FASTA_EXTENSION,
+// inflatedExtensions =
+// { "fna", "fa", "fasta" },
+// fileDeflator = FastaFileDeflator.class,
+// fileInflator = FastaFileInflator.class,
+// fileDeflatorOptionSet = FastaDeflationOptionSet.class,
+// fileInflatorOptionSet = FastaInflationOptionSet.class )
 public interface FastaFileArchiver extends FastFileArchiver
 {
     public final static int    DEFAULT_FASTA_SEQUENCE_LINE_SIZE       = 80;

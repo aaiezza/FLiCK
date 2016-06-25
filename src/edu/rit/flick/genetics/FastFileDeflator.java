@@ -332,6 +332,8 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                     writingToNFile = false;
                 }
 
+                // TODO Maybe pass out this functionality
+                 // **********
                 hyperCompressionBytes[compressionCounter] = dnaByte;
                 if ( compressionCounter == 3 )
                 {
@@ -343,6 +345,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
 
                     compressionCounter = 0;
                 } else compressionCounter++;
+                // *************
 
                 dnaPosition.increment();
                 continue;

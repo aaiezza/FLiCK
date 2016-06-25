@@ -12,7 +12,7 @@ import java.util.Set;
  * @author Alex Aiezza
  *
  */
-public interface OptionSet <V>
+public interface OptionSet
 {
-    public Set<Option<V>> getOptions();
+    public Set<Option<?>> getOptions();
 }

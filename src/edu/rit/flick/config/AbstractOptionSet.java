@@ -13,16 +13,16 @@ import java.util.Set;
  * @author Alex Aiezza
  *
  */
-public abstract class AbstractOptionSet <V extends Object> implements OptionSet<V>
+public abstract class AbstractOptionSet implements OptionSet
 {
-    protected final Set<Option<V>> options;
+    protected final Set<Option<?>> options;
 
     {
-        options = new HashSet<Option<V>>();
+        options = new HashSet<Option<?>>();
     }
 
     @Override
-    public Set<Option<V>> getOptions()
+    public Set<Option<?>> getOptions()
     {
         return options;
     }

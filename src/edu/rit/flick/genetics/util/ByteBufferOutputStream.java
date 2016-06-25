@@ -378,4 +378,10 @@ public class ByteBufferOutputStream extends MeasurableOutputStream implements Re
 
         byteBuffer[curr].put( (byte) b );
     }
+
+    public void write( final Object in ) throws IOException
+    {
+        for ( final byte b : in.toString().getBytes() )
+            put( b );
+    }
 }

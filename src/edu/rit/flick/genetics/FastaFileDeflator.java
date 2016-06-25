@@ -113,7 +113,6 @@ public class FastaFileDeflator extends FastFileDeflator implements FastaFileArch
             (long) ( fastaFile.length() / ( EXPECTED_COMPRESSION_RATIO * 2 ) ) );
     }
 
-
     @Override
     public int getFastaSequenceLineSize()
     {
@@ -194,7 +193,6 @@ public class FastaFileDeflator extends FastFileDeflator implements FastaFileArch
         final long actualTandemFileSize = tandemfile.position();
 
         tandemfile.close();
-
         tandemfile = null;
 
         final File tandemFile = new File( tmpOutputDirectory + TANDEM_REPEAT_FILE );

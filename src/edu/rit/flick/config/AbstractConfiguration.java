@@ -19,7 +19,7 @@ public abstract class AbstractConfiguration implements Configuration
 {
     private final Map<Option<?>, Object> options;
 
-    private final Map<Flag, Boolean>                    flags;
+    private final Map<Flag, Boolean>     flags;
 
     {
         options = new HashMap<Option<? extends Object>, Object>();
@@ -49,10 +49,12 @@ public abstract class AbstractConfiguration implements Configuration
         return flags.get( flag );
     }
 
+    @SuppressWarnings ( "unchecked" )
     @Override
-    public Object getOption( final Option<?> option )
+    public <V> V getOption( final Option<V> option )
     {
-        return options.get( option );
+        final Object optionValue = options.get( option );
+        return (V) optionValue;
     }
 
     @Override
@@ -67,15 +69,14 @@ public abstract class AbstractConfiguration implements Configuration
         return getOptionFromString( e -> e.getShortFlag().matches( optionStr ) );
     }
 
-    private Option<?> getOptionFromString(
-            final Predicate<Option<?>> predicate )
+    private Option<?> getOptionFromString( final Predicate<Option<?>> predicate )
     {
         return Stream.concat( options.keySet().stream(), flags.keySet().stream() )
                 .filter( predicate ).findFirst().get();
     }
 
     @Override
-    public void registerOptionSet( final OptionSet<?> optionSet )
+    public void registerOptionSet( final OptionSet optionSet )
     {
         for ( final Option<?> option : optionSet.getOptions() )
             if ( option.isFlag() )

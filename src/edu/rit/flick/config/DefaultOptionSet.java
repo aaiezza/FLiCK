@@ -10,7 +10,6 @@ package edu.rit.flick.config;
  * @author Alex Aiezza
  *
  */
-@SuppressWarnings ( { "rawtypes", "unchecked" } )
 public class DefaultOptionSet extends AbstractOptionSet
 {
     public static final boolean        DEFLATION_ARCHIVE_MODE = true;

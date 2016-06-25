@@ -10,7 +10,7 @@ package edu.rit.flick.config;
  * @author Alex Aiezza
  *
  */
-public class DeflationOptionSet extends AbstractOptionSet<Boolean>
+public class DeflationOptionSet extends AbstractOptionSet
 {
     public static final Flag NO_ZIP_FLAG = new DefaultFlag( "no zip", "no-zip", "", false );
 

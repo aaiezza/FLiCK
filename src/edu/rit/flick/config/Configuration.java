@@ -22,7 +22,7 @@ public interface Configuration
 
     public Map<Flag, Boolean> getFlags();
 
-    public Object getOption( final Option<?> option );
+    public <V> V getOption( final Option<V> option );
 
     public Map<Option<?>, Object> getOptions();
 
@@ -30,7 +30,7 @@ public interface Configuration
 
     public Option<?> getOptionFromShortFormat( final String optionStr );
 
-    public void registerOptionSet( final OptionSet<?> optionSet );
+    public void registerOptionSet( final OptionSet optionSet );
 
     public void setFlag( final Flag flag, final boolean value );
 

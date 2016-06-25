@@ -35,13 +35,13 @@ launch4j {
 
     headerType = 'console'
     outputDir = "resources"
-    chdir = ''
+    // chdir = ''
     icon = "$projectDir/resources/logo.ico"
     
     bundledJrePath = "%JAVA_HOME%/bin/java.exe"
     bundledJre64Bit = true
     bundledJreAsFallback = true
-    downloadUrl = 'http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html'
+    downloadUrl = 'http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html'
     
     // companyName = 'Aiezza Inc'
     supportUrl = 'https://github.com/aaiezza/flick'
@@ -84,6 +84,7 @@ dependencies {
     compile 'net.lingala.zip4j:zip4j:1.3.2'
     compile 'it.unimi.dsi:dsiutils:2.2.4'
     compile 'org.springframework:spring-context:4.2.5.RELEASE'
+    compile 'org.apache.commons:commons-compress:1.11'
     
     testCompile 'junit:junit:4.+'
     testCompile 'junit-addons:junit-addons:1.+'
