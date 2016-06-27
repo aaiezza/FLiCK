@@ -332,17 +332,7 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                     writingToNFile = false;
                 }
 
-                hyperCompressionBytes[compressionCounter] = dnaByte;
-                if ( compressionCounter == 3 )
-                {
-                    final String tetramer = new String( hyperCompressionBytes );
-
-                    if ( !getByteConverter().containsKey( tetramer ) )
-                        throw new TetramerNotFoundException( tetramer );
-                    else datahcf.put( getByteConverter().get( tetramer ).byteValue() );
-
-                    compressionCounter = 0;
-                } else compressionCounter++;
+                processConventionalNucleotide();
 
                 dnaPosition.increment();
                 continue;
@@ -373,6 +363,21 @@ public abstract class FastFileDeflator implements FastFileArchiver, FileDeflator
                 dnaPosition.increment();
             }
         }
+    }
+
+    protected void processConventionalNucleotide() throws IOException
+    {
+        hyperCompressionBytes[compressionCounter] = dnaByte;
+        if ( compressionCounter == 3 )
+        {
+            final String tetramer = new String( hyperCompressionBytes );
+
+            if ( !getByteConverter().containsKey( tetramer ) )
+                throw new TetramerNotFoundException( tetramer );
+            else datahcf.put( getByteConverter().get( tetramer ).byteValue() );
+
+            compressionCounter = 0;
+        } else compressionCounter++;
     }
 
     protected void processProperties() throws IOException
