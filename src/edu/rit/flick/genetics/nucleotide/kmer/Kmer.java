@@ -1,5 +1,11 @@
 package edu.rit.flick.genetics.nucleotide.kmer;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import edu.rit.flick.genetics.nucleotide.Nucleotide;
+
 /**
  * @author Alex Aiezza
  *
@@ -44,19 +50,19 @@ public class Kmer
 
     public Kmer makeChild( final byte suffixNucleotide )
     {
-        return new Kmer( suffix() + suffixNucleotide );
-    }
-
-    public Kmer makeChildAndAdd( final byte suffixNucleotide )
-    {
-        final Kmer kmer = makeChild( suffixNucleotide );
-
-        return kmer;
+        return new Kmer( suffix() + (char) suffixNucleotide );
     }
 
     public String prefix()
     {
         return kmer.substring( 0, kmer.length() - 1 );
+    }
+
+    public Set<Kmer> getPossibleSuccessors()
+    {
+        return Stream.of( Nucleotide.A, Nucleotide.C, Nucleotide.G, Nucleotide.T )
+                .map( n -> new Kmer( suffix() + (char) n.byteValue() ) )
+                .collect( Collectors.toSet() );
     }
 
     public int size()

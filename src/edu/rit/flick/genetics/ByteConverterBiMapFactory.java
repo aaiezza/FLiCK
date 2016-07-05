@@ -36,6 +36,7 @@ public class ByteConverterBiMapFactory
         System.out.println( "A    : " + byteConverter.get( "A" ) );
         System.out.println( "AT   : " + byteConverter.get( "AT" ) );
         System.out.println( "TNAG : " + byteConverter.get( "TNAG" ) );
+        System.out.println( "TTAG : " + byteConverter.get( "TTAG" ) );
     }
 
     private final char [] NUCLEOTIDES;

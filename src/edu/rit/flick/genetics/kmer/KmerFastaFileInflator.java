@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.LongAdder;
@@ -26,6 +27,8 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
 {
     // Input files
     protected FileInputStream    bloomfile;
+    protected FileInputStream    falsePositivesfile;
+    protected Scanner            splitsfile;
 
     protected KmerDeBruijnGraph  deBruijn;
 
@@ -34,10 +37,11 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
     protected CyclicBuffer<Byte> kmerBuffer;
     protected byte []            kbuff;
 
-    protected final LongAdder    nodeCounter     = new LongAdder();
+    protected final LongAdder    nodeCounter      = new LongAdder();
     protected long               maxNodes;
 
-    protected Queue<Character>   diffNucleotides = new ConcurrentLinkedQueue<Character>()
+    protected long               splitNodeIndex;
+    protected Queue<Character>   splitNucleotides = new ConcurrentLinkedQueue<Character>()
     // @formatter:off
     {
         private static final long serialVersionUID = 1L;
@@ -73,8 +77,11 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
     {
         super.close();
         bloomfile.close();
+        falsePositivesfile.close();
+        splitsfile.close();
     }
 
+    @SuppressWarnings ( "resource" )
     @Override
     protected void createOutputFiles( final String tempOutputDirectory, final File fastFile )
             throws IOException
@@ -82,13 +89,18 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
         super.createOutputFiles( tempOutputDirectory, fastFile );
 
         bloomfile = new FileInputStream( getFile( tempOutputDirectory, BLOOM_FILTER_FILE ) );
+        falsePositivesfile = new FileInputStream(
+                getFile( tempOutputDirectory, FALSE_POSITIVES_FILE ) );
+        splitsfile = new Scanner(
+                new FileInputStream( getFile( tempOutputDirectory, SPLITS_FILE ) ) )
+                        .useDelimiter( "\\" + PIPE );
 
-        kmerBuffer = new CyclicBuffer<Byte>( kmerSize - 1 );
-        kbuff = new byte [kmerSize - 1];
+        kmerBuffer = new CyclicBuffer<Byte>( kmerSize );
+        kbuff = new byte [kmerSize];
         while ( kmerBuffer.length() != kmerBuffer.getMaxSize() )
-            kmerBuffer.add( (byte) diffNucleotides.poll().charValue() );
+            kmerBuffer.add( (byte) splitNucleotides.poll().charValue() );
         deBruijn = new KmerDeBruijnGraph( kmerSize );
-        deBruijn.readFrom( bloomfile );
+        deBruijn.readFrom( bloomfile, falsePositivesfile );
     }
 
 
@@ -107,25 +119,32 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
         {
             final String tetramer = byteConverter.inverse().get( (byte) datahcf.read() );
             tetramer.chars().mapToObj( n -> Character.valueOf( (char) n ) )
-                    .forEachOrdered( diffNucleotides::add );
+                    .forEachOrdered( splitNucleotides::add );
             return true;
         }
         if ( tailfile.hasNext() )
         {
             tailfile.next().chars().mapToObj( n -> Character.valueOf( (char) n ) )
-                    .forEachOrdered( diffNucleotides::add );
+                    .forEachOrdered( splitNucleotides::add );
             return true;
         }
         return false;
     }
 
-    @Override
-    protected void getNextIupacBase()
-    {}
+    protected void getNextDifferenceIndex()
+    {
+        if ( ( nodeCounter.longValue() >= splitNodeIndex || splitNodeIndex < 0 ) &&
+                splitsfile.hasNext() )
+            splitNodeIndex = Long.parseUnsignedLong( splitsfile.next(), 16 );
+    }
 
-    @Override
-    protected void getNextNs()
-    {}
+    // @Override
+    // protected void getNextIupacBase()
+    // {}
+    //
+    // @Override
+    // protected void getNextNs()
+    // {}
 
     @Override
     protected boolean getNextNucleotides()
@@ -137,32 +156,45 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
             return true;
         }
 
-        if ( nodeCounter.longValue() > maxNodes )
+        if ( nodeCounter.longValue() > maxNodes || !fastOut.hasRemaining() )
             return false;
 
         final Kmer kmer;
         if ( ( kmer = new Kmer( getKmerBuffer() ) ) != null )
         {
-            final Set<Kmer> successors = deBruijn.possibleSuccessors( kmer );
+            final Set<Kmer> successors = deBruijn.getSuccessors( kmer );
             if ( successors.size() == 1 )
             {
-                nucleotides.replace( successors.stream().findFirst().get().lastNucleotide() );
-                kmerBuffer.add(
-                    (byte) successors.stream().findFirst().get().lastNucleotide().charAt( 0 ) );
+                final String successor = successors.stream().findFirst().get().lastNucleotide();
+
+                if ( nodeCounter.longValue() == splitNodeIndex )
+                {
+                    if ( successor.equals( splitNucleotides.peek() ) )
+                        throw new IllegalStateException( String.format(
+                            "We are at node %d and the diffNodeIndex (%d) says we should use this (%s) nucleotide but it matches the nucleotide of the only sucessor anyways!",
+                            nodeCounter.longValue(), splitNodeIndex, splitNucleotides.peek() ) );
+
+                    // **** We are just a little different here
+                    nucleotides.replace( splitNucleotides.poll() );
+                    getNextDifferenceIndex();
+                } else
+                    // **** We have a simple path!
+                    nucleotides.replace( successors.stream().findFirst().get().lastNucleotide() );
+
+                kmerBuffer.add( (byte) successor.charAt( 0 ) );
+
             } else
             {
-                // We are branching
-                final char nextNucleotide = diffNucleotides.poll();
+                // **** We are branching
+                final char nextNucleotide = splitNucleotides.poll();
                 if ( successors.stream()
                         .filter( k -> k.lastNucleotide().equals( nextNucleotide + "" ) )
                         .count() <= 0 )
-                    // throw new IllegalStateException( String.format(
-                    // "Something's fishy here... The next nucleotide (%s)
-                    // doesn't match any of the graph's successors from this
-                    // node!\n (node #: %d)",
-                    // nextNucleotide + "", nodeCounter.longValue() ) );
+                    throw new IllegalStateException( String.format(
+                        "Something's fishy here... The next nucleotide (%s) doesn't match any of the graph's successors from this node!\n (node #: %d)",
+                        nextNucleotide + "", nodeCounter.longValue() ) );
 
-                    nucleotides.replace( "" + nextNucleotide );
+                nucleotides.replace( "" + nextNucleotide );
                 kmerBuffer.add( (byte) nextNucleotide );
             }
             nodeCounter.increment();
@@ -173,9 +205,13 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
     @Override
     protected void initializeInflator()
     {
+        splitNodeIndex = -1;
         nodeCounter.reset();
 
         super.initializeInflator();
+
+        getNextDifference();
+        getNextDifferenceIndex();
     }
 
     @Override
