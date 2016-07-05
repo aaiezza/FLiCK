@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -40,6 +41,7 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
     protected final LongAdder    nodeCounter     = new LongAdder();
     protected long               maxNodes;
 
+    protected long               consecDiffs     = -1;
     protected long               diffNodeIndex;
     protected Queue<Character>   diffNucleotides = new ConcurrentLinkedQueue<Character>()
     // @formatter:off
@@ -133,9 +135,26 @@ public class KmerFastaFileInflator extends FastaFileInflator implements KmerFast
 
     protected void getNextDifferenceIndex()
     {
+        if ( consecDiffs > 0 )
+        {
+            diffNodeIndex++;
+            consecDiffs--;
+            return;
+        }
         if ( ( nodeCounter.longValue() >= diffNodeIndex || diffNodeIndex < 0 ) &&
                 diffsfile.hasNext() )
-            diffNodeIndex = Long.parseUnsignedLong( diffsfile.next(), 16 );
+        {
+            final long diffEnd;
+            final StringTokenizer diffs;
+            final String line = diffsfile.next().trim();
+            if ( !line.isEmpty() )
+            {
+                diffs = new StringTokenizer( line, RANGE );
+                diffNodeIndex = Long.parseLong( diffs.nextToken(), 16 );
+                diffEnd = Long.parseLong( diffs.nextToken(), 16 );
+                consecDiffs = diffEnd - diffNodeIndex - 1;
+            }
+        }
     }
 
     // @Override

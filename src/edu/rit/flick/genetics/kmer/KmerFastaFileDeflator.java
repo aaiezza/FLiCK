@@ -195,63 +195,98 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
      */
     protected void kmerMapping() throws IOException
     {
-        try
+        final String kmerStr = getKmerBuffer();
+        final Kmer kmer;
+        final String nextNucleotide = "" + (char) dnaByte;
+
+        // Write out the anchor
+        if ( datahcf.position() == 0 )
+            for ( final byte nb : kmerStr.getBytes() )
+                write2Bit( nb );
+
+        if ( ( kmer = deBruijn.getKmer( kmerStr ) ) != null )
         {
-            final String kmerStr = getKmerBuffer();
-            final Kmer kmer;
-            final String nextNucleotide = "" + (char) dnaByte;
+            kmersRead.increment();
 
-            // Write out the anchor
-            if ( datahcf.position() == 0 )
-                for ( final byte nb : kmerStr.getBytes() )
-                    write2Bit( nb );
-
-            if ( ( kmer = deBruijn.getKmer( kmerStr ) ) != null )
+            final Kmer nextKmer = new Kmer( kmer.suffix() + nextNucleotide );
+            final Set<Kmer> successors = deBruijn.getSuccessors( kmer, true );
+            if ( successors.size() == 0 )
             {
-                kmersRead.increment();
-
-                final Kmer nextKmer = new Kmer( kmer.suffix() + nextNucleotide );
-                final Set<Kmer> successors = deBruijn.getSuccessors( kmer, true );
-                if ( successors.size() == 0 )
+                // **** No successors means we fill in the gap so at least
+                // there's something there
+                readGaps.increment();
+                deBruijn.addKmer( nextKmer.getKmer() );
+                kmerBuffer.add( (byte) nextNucleotide.charAt( 0 ) );
+                return;
+            }
+            if ( successors.size() == 1 )
+            {
+                if ( !successors.contains( nextKmer ) )
                 {
-                    // **** No successors means we fill in the gap so at least
-                    // there's something there
-                    readGaps.increment();
-                    deBruijn.addKmer( nextKmer.getKmer() );
-                    kmerBuffer.add( (byte) nextNucleotide.charAt( 0 ) );
-                    return;
-                }
-                if ( successors.size() == 1 )
-                {
-                    if ( !successors.contains( nextKmer ) )
-                    {
-                        readErrors.increment();
-                        // **** Probable sequencing error; Mark Difference
-                        write2Bit( (byte) nextNucleotide.charAt( 0 ) );
-                        diffsfile.write(
-                            ( Long.toHexString( kmersRead.longValue() ) + PIPE ).getBytes() );
-                    }
-                    kmerBuffer.add(
-                        (byte) successors.stream().findFirst().get().lastNucleotide().charAt( 0 ) );
-                } else
-                {
-                    // **** Mark a split in the graph
-                    readSplits.increment();
+                    readErrors.increment();
+                    // **** Probable sequencing error; Mark Difference
                     write2Bit( (byte) nextNucleotide.charAt( 0 ) );
-                    kmerBuffer.add( (byte) nextNucleotide.charAt( 0 ) );
+                    processDifference();
+                } else if ( writingDifferenceRange )
+                {
+                    final String diffPositionStr = Long.toHexString( kmersRead.longValue() )
+                            .toUpperCase() + PIPE;
+                    diffsfile.write( diffPositionStr.getBytes() );
+                    writingDifferenceRange = false;
                 }
+
+                kmerBuffer.add(
+                    (byte) successors.stream().findFirst().get().lastNucleotide().charAt( 0 ) );
             } else
             {
-                // shouldn't fall in here
-                kmersRead.increment();
-                write2Bit( (byte) kmerStr.charAt( kmerStr.length() - 1 ) );
+                // **** Mark a split in the graph
+                readSplits.increment();
+                write2Bit( (byte) nextNucleotide.charAt( 0 ) );
+                kmerBuffer.add( (byte) nextNucleotide.charAt( 0 ) );
+
+                if ( writingDifferenceRange )
+                {
+                    final String diffPositionStr = Long.toHexString( kmersRead.longValue() )
+                            .toUpperCase() + PIPE;
+                    diffsfile.write( diffPositionStr.getBytes() );
+                    writingDifferenceRange = false;
+                }
             }
-        } catch ( final IOException e )
+        } else
         {
-            System.out.println( "\n\n(IOException)" );
-            printStats();
-            throw e;
+            throw new IllegalStateException( String.format(
+                "While deflating at node (%d), we encounter no kmer not in the debruijn to kmer (%s)!",
+                kmersRead.longValue(), kmerStr ) );
         }
+    }
+
+    protected void processDifference() throws IOException
+    {
+        if ( !startedWritingNucleotides )
+            return;
+
+        if ( !writingDifferenceRange )
+        {
+            writingDifferenceRange = true;
+
+            final String diffPositionStr = Long.toHexString( kmersRead.longValue() ).toUpperCase() +
+                    RANGE;
+            diffsfile.write( diffPositionStr.getBytes() );
+        }
+    }
+
+    @Override
+    protected void processTail() throws IOException
+    {
+        if ( writingDifferenceRange )
+        {
+            final String diffPositionStr = Long.toHexString( kmersRead.longValue() + 1 )
+                    .toUpperCase();
+            diffsfile.write( diffPositionStr.getBytes() );
+            writingDifferenceRange = false;
+        }
+
+        super.processTail();
     }
 
     private void printStats()
