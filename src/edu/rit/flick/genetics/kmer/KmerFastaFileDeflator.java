@@ -31,7 +31,7 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
 
     protected BufferedOutputStream   bloomfile;
     protected BufferedOutputStream   falsePositivesfile;
-    protected BufferedOutputStream   splitsfile;
+    protected BufferedOutputStream   diffsfile;
 
     protected CyclicBuffer<Byte>     kmerBuffer;
     protected byte []                kbuff;
@@ -40,6 +40,8 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
 
     protected boolean                isBuildingDeBruijn;
     protected boolean                startedWritingNucleotides;
+
+    protected boolean                writingDifferenceRange;
 
     protected int                    kmerSize;
 
@@ -55,50 +57,17 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
         falsePositivesfile = new BufferedOutputStream(
                 new FileOutputStream( tempOutputDirectory + FALSE_POSITIVES_FILE ),
                 DEFAULT_BUFFER );
-        splitsfile = new BufferedOutputStream(
-                new FileOutputStream( tempOutputDirectory + SPLITS_FILE ), DEFAULT_BUFFER );
+        diffsfile = new BufferedOutputStream(
+                new FileOutputStream( tempOutputDirectory + DIFFERENCES_FILE ), DEFAULT_BUFFER );
 
         super.createOutputFiles( fastFile, tempOutputDirectory );
 
-//        try
-//        {
-//            nfile.close();
-//            iupacfile.close();
-//        } catch ( final IOException e )
-//        {}
-    }
-
-    @Override
-    public File deflate( final Configuration configuration, final File fileIn, final File fileOut )
-    {
-        kmerSize = configuration.getOption( KMER_SIZE );
-        return super.deflate( configuration, fileIn, fileOut );
-    }
-
-    private String getKmerBuffer()
-    {
-        final Byte [] bytes = kmerBuffer.asList().stream().toArray( Byte []::new );
-        for ( int i = 0; i < bytes.length; i++ )
-            kbuff[i] = bytes[i];
-
-        return new String( kbuff );
-    }
-
-    @Override
-    protected void initializeDeflator()
-    {
-        // Just business as usual, let the super class do its thing
-        super.initializeDeflator();
-
-        kmerBuffer = new CyclicBuffer<Byte>( kmerSize );
-        kbuff = new byte [kmerSize];
-        deBruijn = new KmerDeBruijnGraph( kmerSize );
-        isBuildingDeBruijn = true;
-        startedWritingNucleotides = false;
-        kmersRead = new LongAdder();
-        readErrors = new LongAdder();
-        readSplits = new LongAdder();
-        readGaps = new LongAdder();
+        // try
+        // {
+        // nfile.close();
+        // iupacfile.close();
+        // } catch ( final IOException e )
+        // {}
 
         /*
          * Here's the magic. Let this variable dictate when things actually get
@@ -161,6 +130,42 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
         // public void close() throws IOException
         // {}
         // };
+
+        isBuildingDeBruijn = true;
+        startedWritingNucleotides = false;
+
+        deBruijn = new KmerDeBruijnGraph( kmerSize );
+    }
+
+    @Override
+    public File deflate( final Configuration configuration, final File fileIn, final File fileOut )
+    {
+        kmerSize = configuration.getOption( KMER_SIZE );
+        return super.deflate( configuration, fileIn, fileOut );
+    }
+
+    private String getKmerBuffer()
+    {
+        final Byte [] bytes = kmerBuffer.asList().stream().toArray( Byte []::new );
+        for ( int i = 0; i < bytes.length; i++ )
+            kbuff[i] = bytes[i];
+
+        return new String( kbuff );
+    }
+
+    @Override
+    protected void initializeDeflator()
+    {
+        // Just business as usual, let the super class do its thing
+        super.initializeDeflator();
+
+        kmerBuffer = new CyclicBuffer<Byte>( kmerSize );
+        kbuff = new byte [kmerSize];
+        writingDifferenceRange = false;
+        kmersRead = new LongAdder();
+        readErrors = new LongAdder();
+        readSplits = new LongAdder();
+        readGaps = new LongAdder();
     }
 
     /**
@@ -223,7 +228,7 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
                         readErrors.increment();
                         // **** Probable sequencing error; Mark Difference
                         write2Bit( (byte) nextNucleotide.charAt( 0 ) );
-                        splitsfile.write(
+                        diffsfile.write(
                             ( Long.toHexString( kmersRead.longValue() ) + PIPE ).getBytes() );
                     }
                     kmerBuffer.add(
@@ -233,7 +238,6 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
                     // **** Mark a split in the graph
                     readSplits.increment();
                     write2Bit( (byte) nextNucleotide.charAt( 0 ) );
-
                     kmerBuffer.add( (byte) nextNucleotide.charAt( 0 ) );
                 }
             } else
@@ -337,7 +341,7 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
         super.removeUnusedBufferSpace( tmpOutputDirectory );
 
         bloomfile.close();
-        splitsfile.close();
+        diffsfile.close();
         falsePositivesfile.close();
 
         /*
@@ -362,30 +366,23 @@ public class KmerFastaFileDeflator extends FastaFileDeflator implements KmerFast
 
     protected void stopBuildingDeBruijn()
     {
-        isBuildingDeBruijn = false;
-        super.initializeDeflator();
+        initializeDeflator();
         fastIn.position( 0 );
         if ( fastIn.available() > 0 )
             dnaByte = (byte) fastIn.read();
-        kmerBuffer.clear();
 
+        isBuildingDeBruijn = false;
         deBruijn.startOptimization();
     }
 
     protected void startWritingNucleotides()
     {
-        super.initializeDeflator();
+        initializeDeflator();
         fastIn.position( 0 );
         if ( fastIn.available() > 0 )
             dnaByte = (byte) fastIn.read();
-        kmerBuffer.clear();
+
         startedWritingNucleotides = true;
-
-        readErrors.reset();
-        readGaps.reset();
-        readSplits.reset();
-        kmersRead.reset();
-
         deBruijn.finalizeGraph();
     }
 

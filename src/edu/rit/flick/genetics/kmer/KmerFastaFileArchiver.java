@@ -27,7 +27,7 @@ public interface KmerFastaFileArchiver extends FastaFileArchiver
 {
     public final static String BLOOM_FILTER_FILE     = "bloom.hcf";
     public final static String FALSE_POSITIVES_FILE  = "falsepositives.txt";
-    public final static String SPLITS_FILE           = "splits.txt";
+    public final static String DIFFERENCES_FILE      = "diffs.txt";
 
     public final static String META_KMER_SIZE        = "kmerSize";
     public final static String META_NODES_HIT        = "nodesHit";
