@@ -1,11 +1,14 @@
 # FLiCK
-###&nbsp;&nbsp; [File] <i>F</i>ormat <i>L</i>everag<i>i</i>ng <i>C</i>ompression framewor<i>k</i>
+###&nbsp;[File] <i>F</i>ormat <i>L</i>everag<i>i</i>ng <i>C</i>ompression framewor<i>k</i>
 
 &nbsp;&nbsp;A Bioinformatics thesis project by **Alessandro Aiezza II**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;Defended on July 20, 2016 @ the [Rochester Institute of Technology](https://www.rit.edu/cos/bioinformatics/about.html)
 
 &nbsp;**Committee**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;[Dr. Gary Skuse](https://www.rit.edu/science/people/gary-skuse), [Dr. Greg Babbitt](https://www.rit.edu/science/people/gregory-babbitt), [Dr. Larry Buckley](https://www.rit.edu/science/people/larry-buckley)
+
+&nbsp;**Citation**<br/>
+Aiezza, A.,II. (2016). *The FLiCK framework; enabling rapid development and performance benchmarking of compression applications for genetic data files* (Order No. 10144070). Available from ProQuest Dissertations & Theses Global. (1825611935). Retrieved from http://search.proquest.com/docview/1825611935?accountid=13567
 
 A **Java** framework that makes it easier to develop file compressors/decompressors by leveraging _ab inito_ knowledge about a specific file format. `FLiCK` runs independently as a file compressor and currently will ZIP any files it is given.
 
