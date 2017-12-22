@@ -1,5 +1,5 @@
 # FLiCK
-###&nbsp;[File] <i>F</i>ormat <i>L</i>everag<i>i</i>ng <i>C</i>ompression framewor<i>k</i>
+### &nbsp;[File] <i>F</i>ormat <i>L</i>everag<i>i</i>ng <i>C</i>ompression framewor<i>k</i>
 
 &nbsp;&nbsp;A Bioinformatics thesis project by **Alessandro Aiezza II**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;Defended on July 20, 2016 @ the [Rochester Institute of Technology](https://www.rit.edu/cos/bioinformatics/about.html)
